@@ -77,6 +77,15 @@ async function main() {
 
   fs.writeFileSync(fileTemplate, html);
   console.log("KONTEN OK — tentang.html diperbarui dari database (4 kunci: tentang_profil, tentang_legalitas, tentang_pengurus, kontak_resmi).");
+
+  // js/config.js — dihasilkan dari env (gitignored). Anon key adalah kunci publik
+  // (RLS mengunci tulis), namun tetap tidak pernah masuk commit (SEC-02).
+  const fileCfgTemplate = path.join(__dirname, "..", "js", "config.template.js");
+  const fileCfg = path.join(__dirname, "..", "js", "config.js");
+  let cfgJs = fs.readFileSync(fileCfgTemplate, "utf8");
+  cfgJs = cfgJs.split("{{SUPABASE_URL}}").join(url).split("{{SUPABASE_ANON_KEY}}").join(anon);
+  fs.writeFileSync(fileCfg, cfgJs);
+  console.log("CONFIG OK — js/config.js dihasilkan dari env (tidak di-commit).");
 }
 
 main().catch((e) => {

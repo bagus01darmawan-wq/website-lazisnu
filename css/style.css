@@ -244,3 +244,26 @@ html[data-tema="gelap"] {
 .tombol-tema:hover {
   background: rgba(255, 255, 255, 0.28);
 }
+
+/* Kartu kabar penyaluran (T7, AC-03) */
+.kabar {
+  background: var(--warna-permukaan);
+  border: 1px solid var(--warna-garis);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.kabar h2 {
+  margin-top: 0;
+}
+
+.foto-kabar {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+#daftar-kabar p {
+  overflow-wrap: break-word;
+}
