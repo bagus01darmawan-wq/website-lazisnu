@@ -21,18 +21,17 @@
   </header>
 
   <main class="lebar">
-    <!-- B0 (kerangka): kanal donasi + label transparan (keputusan HOTL, AC-04).
-         Seluruh isi dimuat dari database (kunci konten_halaman) pada T4/T8. -->
+    <!-- T4: kanal donasi + label transparan (AC-04, keputusan HOTL) disuntikkan generator
+         dari database (tabel konten_halaman, B6) — repo tidak memuat data lembaga. -->
     <section aria-labelledby="judul-donasi">
       <h1 id="judul-donasi">Cara Donasi</h1>
       <div id="kanal-donasi">
-        <h2>Rekening Resmi</h2>
-        <p class="catatan">[nomor rekening dimuat dari database]</p>
-        <p class="catatan">[QRIS dimuat dari database]</p>
+        <h2>Rekening</h2>
+        <p>{{donasi_kanal}}</p>
       </div>
       <div id="label-transparan" aria-live="polite">
         <h2>Keterangan Penting</h2>
-        <p class="catatan">[label transparan dimuat dari database]</p>
+        <p>{{donasi_label}}</p>
       </div>
     </section>
   </main>
