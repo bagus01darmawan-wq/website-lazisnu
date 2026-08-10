@@ -16,6 +16,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      # T5: suntik konten Tentang dari database (konten_halaman, baca-saja anon).
+      # Repo tetap kode murni (B6): nilai datang dari secret CI, tidak pernah dari commit.
+      - name: Suntik konten dari database (T5)
+        run: npm run generate
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       - name: Jalankan tes QA bila sudah dipasang
         run: |
           TEST_SCRIPT=$(npm pkg get scripts.test 2>/dev/null || true)

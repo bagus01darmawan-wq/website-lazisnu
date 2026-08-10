@@ -20,29 +20,29 @@
   </header>
 
   <main class="lebar">
-    <!-- B0 (kerangka): profil, legalitas, pengurus, kontak.
-         Seluruh isi dimuat dari database (kunci konten_halaman) pada T5/T8. -->
+    <!-- T5: isi halaman ini disuntikkan generator (scripts/generate-konten.js) dari database
+         (tabel konten_halaman, keputusan B6) — repo tidak memuat data lembaga. -->
     <section aria-labelledby="judul-tentang">
       <h1 id="judul-tentang">Tentang Lembaga</h1>
 
       <div id="tentang-profil">
         <h2>Profil Singkat</h2>
-        <p class="catatan">[profil dimuat dari database]</p>
+        <p>{{tentang_profil}}</p>
       </div>
 
       <div id="tentang-legalitas">
         <h2>Status Legalitas</h2>
-        <p class="catatan">[status legalitas dimuat dari database — tertulis apa adanya]</p>
+        <p>{{tentang_legalitas}}</p>
       </div>
 
       <div id="tentang-pengurus">
         <h2>Struktur Pengurus</h2>
-        <p class="catatan">[struktur pengurus dimuat dari database]</p>
+        <p>{{tentang_pengurus}}</p>
       </div>
 
       <div id="tentang-kontak">
         <h2>Kontak Resmi</h2>
-        <p class="catatan">[kontak resmi dimuat dari database]</p>
+        <p>{{kontak_resmi}}</p>
       </div>
     </section>
   </main>
