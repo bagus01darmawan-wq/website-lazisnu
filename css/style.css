@@ -214,3 +214,33 @@ input {
     min-width: 0;
   }
 }
+
+/* Night mode (T2, AC-07/B8) — tema gelap via variabel; pilihan tersimpan di perangkat */
+html {
+  color-scheme: light;
+}
+
+html[data-tema="gelap"] {
+  color-scheme: dark;
+  --warna-latar: #12161a;
+  --warna-permukaan: #1b2127;
+  --warna-teks: #e8eaed;
+  --warna-teks-redup: #9aa4ae;
+  --warna-aksen: #0d9a74;
+  --warna-aksen-teks: #ffffff;
+  --warna-garis: #2c343c;
+}
+
+.tombol-tema {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--warna-aksen-teks);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tombol-tema:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
