@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LAZISNU MWC NU Kecamatan Paninggaran — Donasi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="situs-header">
+    <div class="lebar">
+      <a class="merek" href="index.html">LAZISNU <span>Paninggaran</span></a>
+      <nav aria-label="Navigasi utama">
+        <a href="index.html">Beranda</a>
+        <a href="penyaluran.html">Penyaluran</a>
+        <a href="donasi.html" class="aktif">Donasi</a>
+        <a href="tentang.html">Tentang</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="lebar">
+    <!-- B0 (kerangka): kanal donasi + label transparan (keputusan HOTL, AC-04).
+         Seluruh isi dimuat dari database (kunci konten_halaman) pada T4/T8. -->
+    <section aria-labelledby="judul-donasi">
+      <h1 id="judul-donasi">Cara Donasi</h1>
+      <div id="kanal-donasi">
+        <h2>Rekening Resmi</h2>
+        <p class="catatan">[nomor rekening dimuat dari database]</p>
+        <p class="catatan">[QRIS dimuat dari database]</p>
+      </div>
+      <div id="label-transparan" aria-live="polite">
+        <h2>Keterangan Penting</h2>
+        <p class="catatan">[label transparan dimuat dari database]</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="situs-footer">
+    <div class="lebar">
+      <p>© <span id="tahun-kini">2026</span> LAZISNU MWC NU Kecamatan Paninggaran</p>
+      <nav aria-label="Navigasi kaki">
+        <a href="admin.html">Admin</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

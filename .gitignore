@@ -1,0 +1,20 @@
+# Dependensi & berkas lokal
+node_modules/
+
+# Kredensial — dilarang masuk commit (aturan B + SEC-02)
+.env
+.env.*
+*.pem
+*.key
+
+# Berkas pribadi lembaga (jika pernah ada salinan lokal)
+PRIBADI-JANGAN-DIUNGGAH.md
+
+# Hasil pemindai rahasia
+gitleaks-report.json
+gitleaks-report.sarif
+
+# Log & sampah sistem
+*.log
+.DS_Store
+Thumbs.db

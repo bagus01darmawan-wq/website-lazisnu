@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — LAZISNU MWC NU Kecamatan Paninggaran</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="situs-header">
+    <div class="lebar">
+      <a class="merek" href="index.html">LAZISNU <span>Paninggaran</span></a>
+      <nav aria-label="Navigasi utama">
+        <a href="index.html">Beranda</a>
+        <a href="penyaluran.html">Penyaluran</a>
+        <a href="donasi.html">Donasi</a>
+        <a href="tentang.html">Tentang</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="lebar">
+    <!-- B0 (kerangka): halaman admin terkunci. Login + form dihubungkan
+         ke Supabase Auth pada T8. Publik tanpa login wajib tertolak (SEC-03/TQ-S3). -->
+    <section aria-labelledby="judul-admin">
+      <h1 id="judul-admin">Halaman Admin</h1>
+      <p class="catatan">Halaman ini hanya untuk 2 admin lembaga.</p>
+
+      <form id="form-login" class="kartu">
+        <h2>Masuk</h2>
+        <p>
+          <label for="login-email">Alamat email admin</label>
+          <input type="email" id="login-email" name="email" autocomplete="username" required>
+        </p>
+        <p>
+          <label for="login-sandi">Kata sandi</label>
+          <input type="password" id="login-sandi" name="sandi" autocomplete="current-password" required>
+        </p>
+        <p>
+          <button type="submit" class="tombol">Masuk</button>
+        </p>
+        <p><a href="#" id="tautan-lupa-sandi">Lupa kata sandi?</a></p>
+      </form>
+
+      <div id="wilayah-admin" hidden>
+        <!-- B0 (kerangka): 4 form kecil (angka dana, kabar, kanal donasi, konten tentang) dihubungkan pada T8. -->
+        <p class="catatan">[Form: angka dana + riwayat, kabar penyaluran, kanal donasi, konten Tentang — T8]</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="situs-footer">
+    <div class="lebar">
+      <p>© <span id="tahun-kini">2026</span> LAZISNU MWC NU Kecamatan Paninggaran</p>
+      <nav aria-label="Navigasi kaki">
+        <a href="admin.html" class="aktif">Admin</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+name: ci-website-lazisnu
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Tes QA — ditulis QA-agent (rencana tes 05), dilarang diubah builder (aturan A).
+  # Hijau = syarat merge. Saat B0: skrip tes belum dipasang QA-agent, job lulus kosong.
+  tes-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Jalankan tes QA bila sudah dipasang
+        run: |
+          TEST_SCRIPT=$(npm pkg get scripts.test 2>/dev/null || true)
+          if [ "$TEST_SCRIPT" != "{}" ] && [ -n "$TEST_SCRIPT" ]; then
+            echo "Skrip tes ditemukan — menjalankan: npm test"
+            npm test
+          else
+            echo "Fase B0: tes QA belum dipasang oleh QA-agent (failing-first menyusul). Job lulus kosong."
+          fi
+
+  # Pemindai rahasia — SEC-02: nol kunci/kredensial di kode maupun riwayat commit. Syarat mutlak.
+  pemindai-rahasia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (SEC-02)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Build — memastikan kerangka situs utuh.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Periksa kerangka situs
+        run: npm run build
