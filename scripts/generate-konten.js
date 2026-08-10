@@ -30,13 +30,25 @@ function bacaEnv() {
   return env;
 }
 
-// Kunci konten_halaman yang disuntikkan ke halaman Tentang (peta skema desain G1).
-const PEMETAAN = {
-  tentang_profil: "{{tentang_profil}}",
-  tentang_legalitas: "{{tentang_legalitas}}",
-  tentang_pengurus: "{{tentang_pengurus}}",
-  kontak_resmi: "{{kontak_resmi}}",
-};
+// Peta halaman → kunci konten_halaman yang disuntikkan (skema desain G1).
+const HALAMAN = [
+  {
+    file: "tentang.html",
+    kunci: {
+      tentang_profil: "{{tentang_profil}}",
+      tentang_legalitas: "{{tentang_legalitas}}",
+      tentang_pengurus: "{{tentang_pengurus}}",
+      kontak_resmi: "{{kontak_resmi}}",
+    },
+  },
+  {
+    file: "donasi.html",
+    kunci: {
+      donasi_kanal: "{{donasi_kanal}}",
+      donasi_label: "{{donasi_label}}",
+    },
+  },
+];
 
 async function main() {
   const env = bacaEnv();
@@ -61,22 +73,22 @@ async function main() {
   const baris = await res.json();
   const konten = new Map(baris.map((b) => [b.kunci, b.nilai]));
 
-  const fileTemplate = path.join(__dirname, "..", "tentang.html");
-  let html = fs.readFileSync(fileTemplate, "utf8");
-
-  const hilang = [];
-  for (const [kunci, token] of Object.entries(PEMETAAN)) {
-    const nilai = (konten.get(kunci) || "").trim();
-    if (!nilai) hilang.push(kunci);
-    html = html.split(token).join(nilai);
+  for (const halaman of HALAMAN) {
+    const file = path.join(__dirname, "..", halaman.file);
+    let html = fs.readFileSync(file, "utf8");
+    const hilang = [];
+    for (const [kunci, token] of Object.entries(halaman.kunci)) {
+      const nilai = (konten.get(kunci) || "").trim();
+      if (!nilai) hilang.push(kunci);
+      html = html.split(token).join(nilai);
+    }
+    if (hilang.length > 0) {
+      console.error(`GAGAL: konten database belum lengkap untuk ${halaman.file} — kunci kosong: ${hilang.join(", ")}`);
+      process.exit(1);
+    }
+    fs.writeFileSync(file, html);
   }
-  if (hilang.length > 0) {
-    console.error(`GAGAL: konten database belum lengkap — kunci kosong: ${hilang.join(", ")}`);
-    process.exit(1);
-  }
-
-  fs.writeFileSync(fileTemplate, html);
-  console.log("KONTEN OK — tentang.html diperbarui dari database (4 kunci: tentang_profil, tentang_legalitas, tentang_pengurus, kontak_resmi).");
+  console.log("KONTEN OK — tentang.html & donasi.html diperbarui dari database (6 kunci).");
 
   // js/config.js — dihasilkan dari env (gitignored). Anon key adalah kunci publik
   // (RLS mengunci tulis), namun tetap tidak pernah masuk commit (SEC-02).
