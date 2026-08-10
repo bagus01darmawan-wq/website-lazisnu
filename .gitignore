@@ -14,6 +14,9 @@ PRIBADI-JANGAN-DIUNGGAH.md
 gitleaks-report.json
 gitleaks-report.sarif
 
+# Konfigurasi data hasil generate (mengandung anon key publik; dibuat scripts/generate-konten.js)
+js/config.js
+
 # Log & sampah sistem
 *.log
 .DS_Store

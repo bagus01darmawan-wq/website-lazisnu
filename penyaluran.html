@@ -21,12 +21,11 @@
   </header>
 
   <main class="lebar">
-    <!-- B0 (kerangka): daftar kabar penyaluran. Data dimuat dari database pada T7. -->
+    <!-- T7: daftar kabar dimuat dari database (kabar_penyaluran, terbit=true) via js/data.js -->
     <section aria-labelledby="judul-penyaluran">
       <h1 id="judul-penyaluran">Kabar Penyaluran</h1>
-      <p class="catatan">[Daftar kabar dimuat dari database — T7]</p>
       <div id="daftar-kabar">
-        <p class="catatan">Belum ada kabar yang diterbitkan.</p>
+        <p class="catatan">Memuat kabar…</p>
       </div>
     </section>
   </main>
@@ -40,6 +39,8 @@
     </div>
   </footer>
 
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
