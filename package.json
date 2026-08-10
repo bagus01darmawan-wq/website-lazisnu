@@ -4,6 +4,8 @@
   "description": "Website identitas LAZISNU MWC NU Kecamatan Paninggaran — Inkremen 1 (PRD-001). Repo kode murni; seluruh konten lembaga hidup di database (keputusan desain B6).",
   "private": true,
   "scripts": {
-    "build": "node scripts/build-check.js"
+    "build": "node scripts/build-check.js",
+    "generate": "node scripts/generate-konten.js",
+    "test": "node tests/run-tes.js"
   }
 }

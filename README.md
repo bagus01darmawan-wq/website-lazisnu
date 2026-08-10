@@ -36,3 +36,19 @@ Website identitas **LAZISNU MWC NU Kecamatan Paninggaran** — Inkremen 1 dari P
 ```bash
 npm run build
 ```
+
+## Konten dari database (T5, keputusan desain B6)
+
+Halaman Tentang diisi **generator** (`npm run generate`) yang membaca tabel `konten_halaman`
+di Supabase (baca-saja via anon key + RLS) lalu menyuntikkan nilainya ke `tentang.html`.
+Repo ini tidak pernah memuat data lembaga — konten hidup di database.
+
+Konfigurasi generator (nilai tidak pernah di-commit):
+
+| Variabel | Asal |
+|---|---|
+| `SUPABASE_URL` | Secret CI `SUPABASE_URL`; lokal: `.env` (gitignored) |
+| `SUPABASE_ANON_KEY` | Secret CI `SUPABASE_ANON_KEY`; lokal: `.env` (gitignored) |
+
+Alur lokal: `npm run generate && npm test` (generate akan menimpa `tentang.html` di
+working tree dengan versi berisi konten — jangan pernah `git add` berkas hasil generate).
