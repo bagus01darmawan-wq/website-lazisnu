@@ -21,8 +21,7 @@
   </header>
 
   <main class="lebar">
-    <!-- B0 (kerangka): halaman admin terkunci. Login + form dihubungkan
-         ke Supabase Auth pada T8. Publik tanpa login wajib tertolak (SEC-03/TQ-S3). -->
+    <!-- T8: login Supabase Auth + 4 form admin. Tanpa login, form TIDAK tampil (SEC-03/TQ-S3). -->
     <section aria-labelledby="judul-admin">
       <h1 id="judul-admin">Halaman Admin</h1>
       <p class="catatan">Halaman ini hanya untuk 2 admin lembaga.</p>
@@ -31,21 +30,98 @@
         <h2>Masuk</h2>
         <p>
           <label for="login-email">Alamat email admin</label>
-          <input type="email" id="login-email" name="email" autocomplete="username" required>
+          <input type="email" id="login-email" autocomplete="username" required>
         </p>
         <p>
           <label for="login-sandi">Kata sandi</label>
-          <input type="password" id="login-sandi" name="sandi" autocomplete="current-password" required>
+          <input type="password" id="login-sandi" autocomplete="current-password" required>
         </p>
-        <p>
-          <button type="submit" class="tombol">Masuk</button>
-        </p>
+        <p id="pesan-login" class="catatan" role="alert"></p>
+        <p><button type="submit" class="tombol">Masuk</button></p>
         <p><a href="#" id="tautan-lupa-sandi">Lupa kata sandi?</a></p>
       </form>
 
       <div id="wilayah-admin" hidden>
-        <!-- B0 (kerangka): 4 form kecil (angka dana, kabar, kanal donasi, konten tentang) dihubungkan pada T8. -->
-        <p class="catatan">[Form: angka dana + riwayat, kabar penyaluran, kanal donasi, konten Tentang — T8]</p>
+        <p class="catatan">Masuk sebagai: <strong id="admin-email"></strong> · <a href="#" id="tautan-keluar">Keluar</a></p>
+
+        <form id="form-angka" class="kartu">
+          <h2>Perbarui Angka Dana</h2>
+          <p>
+            <label for="angka-periode">Periode (mis. 2026)</label>
+            <input type="text" id="angka-periode" required>
+          </p>
+          <p>
+            <label for="angka-terkumpul-input">Dana terkumpul (Rp)</label>
+            <input type="number" id="angka-terkumpul-input" min="1" step="1" required>
+          </p>
+          <p>
+            <label for="angka-tersalurkan-input">Dana tersalurkan (Rp)</label>
+            <input type="number" id="angka-tersalurkan-input" min="1" step="1" required>
+          </p>
+          <p id="pesan-angka" class="catatan" role="alert"></p>
+          <p><button type="submit" class="tombol">Simpan Angka</button></p>
+        </form>
+
+        <form id="form-kabar" class="kartu">
+          <h2>Tambah Kabar Penyaluran</h2>
+          <p>
+            <label for="kabar-judul">Judul</label>
+            <input type="text" id="kabar-judul" required>
+          </p>
+          <p>
+            <label for="kabar-tanggal">Tanggal</label>
+            <input type="date" id="kabar-tanggal" required>
+          </p>
+          <p>
+            <label for="kabar-ringkasan">Ringkasan</label>
+            <textarea id="kabar-ringkasan" rows="3" required></textarea>
+          </p>
+          <p>
+            <label for="kabar-url-foto">URL foto (opsional)</label>
+            <input type="url" id="kabar-url-foto">
+          </p>
+          <p>
+            <label><input type="checkbox" id="kabar-terbit" checked> Langsung terbit</label>
+          </p>
+          <p id="pesan-kabar" class="catatan" role="alert"></p>
+          <p><button type="submit" class="tombol">Simpan Kabar</button></p>
+        </form>
+
+        <form id="form-donasi" class="kartu">
+          <h2>Kanal Donasi &amp; Label Transparan</h2>
+          <p>
+            <label for="donasi-kanal-input">Kanal (rekening)</label>
+            <input type="text" id="donasi-kanal-input">
+          </p>
+          <p>
+            <label for="donasi-label-input">Label transparan</label>
+            <textarea id="donasi-label-input" rows="3"></textarea>
+          </p>
+          <p id="pesan-donasi" class="catatan" role="alert"></p>
+          <p><button type="submit" class="tombol">Simpan Donasi</button></p>
+        </form>
+
+        <form id="form-tentang" class="kartu">
+          <h2>Konten Halaman Tentang</h2>
+          <p>
+            <label for="tentang-profil-input">Profil singkat</label>
+            <textarea id="tentang-profil-input" rows="3"></textarea>
+          </p>
+          <p>
+            <label for="tentang-legalitas-input">Status legalitas</label>
+            <textarea id="tentang-legalitas-input" rows="2"></textarea>
+          </p>
+          <p>
+            <label for="tentang-pengurus-input">Struktur pengurus</label>
+            <textarea id="tentang-pengurus-input" rows="2"></textarea>
+          </p>
+          <p>
+            <label for="kontak-resmi-input">Kontak resmi</label>
+            <input type="text" id="kontak-resmi-input">
+          </p>
+          <p id="pesan-tentang" class="catatan" role="alert"></p>
+          <p><button type="submit" class="tombol">Simpan Tentang</button></p>
+        </form>
       </div>
     </section>
   </main>
@@ -59,6 +135,8 @@
     </div>
   </footer>
 
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
