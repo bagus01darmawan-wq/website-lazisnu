@@ -2,7 +2,7 @@
 
 Website identitas **LAZISNU MWC NU Kecamatan Paninggaran** — Inkremen 1 dari PRD-001, dibangun dalam sistem tata kelola [SDLC-HOTL](https://github.com/bagus01darmawan-wq/sdlc-hotl) (repo tata kelola, publik).
 
-**Status:** Fase B0 (fondasi) — kerangka 5 halaman + CI hidup. Pembangunan fitur menyusul bertahap (T2–T12) setelah tes QA pertama dipasang.
+**Status:** Fase B0 selesai — menunggu QA-agent memasang kode tes pertama (failing-first, MERAH dulu). Lihat [HANTAR-KE-QA.md](HANTAR-KE-QA.md). Pembangunan fitur menyusul bertahap (B1–B5, T2–T12).
 
 ## Prinsip repo ini
 
