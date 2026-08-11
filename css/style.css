@@ -339,3 +339,60 @@ html[data-tema="gelap"] .banner-peringatan {
   background: #2e2413;
   color: #e8c766;
 }
+
+/* Banner sukses bertahan (K11/R13, W12/W15): elemen flow DI BAWAH tombol,
+   tidak menutupi tombol; angka tabular-nums; token W14 untuk tautan. */
+.banner-sukses {
+  background: #e8f3ec;
+  border-left: 4px solid #0b3d2e;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #0b3d2e;
+  margin-top: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.banner-sukses p {
+  margin: 0 0 0.25rem;
+}
+
+.banner-sukses a {
+  color: #0b6b4a;
+}
+
+html[data-tema="gelap"] .banner-sukses {
+  background: #14301f;
+  color: #8fe3b0;
+}
+
+html[data-tema="gelap"] .banner-sukses a {
+  color: #6fd3a8;
+}
+
+/* Dialog sesi mati (R4/H8, W13): satu-satunya overlay; kartu lebar <=360px. */
+.dialog-tutup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+}
+
+.dialog-tutup[hidden] {
+  display: none;
+}
+
+.dialog-kartu {
+  background: #ffffff;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  max-width: 360px;
+  width: 100%;
+}
+
+html[data-tema="gelap"] .dialog-kartu {
+  background: #16241d;
+}

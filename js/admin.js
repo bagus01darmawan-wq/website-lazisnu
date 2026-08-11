@@ -138,6 +138,119 @@
     if (banner) banner.hidden = !tampil;
   }
 
+  // --- P1 (R4/R5/R6/R13): helper bersama paket desain form admin
+  var GALAT_SESI = { sesiMati: true }; // penanda khusus: 401 = sesi mati (R4)
+
+  function tolakJikaSesiMati(r) {
+    if (r.status === 401) throw GALAT_SESI;
+  }
+
+  // W15: angka tampil bertitik ribuan ("2.500.000").
+  function formatAngka(n) {
+    return new Intl.NumberFormat("id-ID").format(n);
+  }
+
+  // R5 (K13): kunci tombol selama proses — disabled + "Menyimpan…" + aria-busy;
+  // label asli disimpan agar bisa dikembalikan (W11: disabled tetap terbaca).
+  function aturTombolProses(id, sibuk) {
+    var b = document.getElementById(id);
+    if (!b) return;
+    if (sibuk) {
+      if (!b.dataset.labelAsli) b.dataset.labelAsli = b.textContent;
+      b.disabled = true;
+      b.setAttribute("aria-busy", "true");
+      b.textContent = "Menyimpan…";
+    } else {
+      b.disabled = false;
+      b.setAttribute("aria-busy", "false");
+      b.textContent = b.dataset.labelAsli || b.textContent;
+    }
+  }
+
+  // R13 (K11): banner sukses bertahan (role="status"), dibangun via DOM dengan
+  // textContent — data dari database tidak pernah masuk sebagai HTML.
+  function tampilBannerSukses(id, baris, tautan) {
+    var banner = document.getElementById(id);
+    if (!banner) return;
+    banner.hidden = false;
+    banner.textContent = "";
+    baris.forEach(function (teks) {
+      var p = document.createElement("p");
+      p.textContent = teks;
+      banner.appendChild(p);
+    });
+    if (tautan) {
+      var a = document.createElement("a");
+      a.href = tautan;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "Lihat di situs (tab baru)";
+      banner.appendChild(a);
+    }
+  }
+
+  // R4 (K8/2.8, H8): dialog sesi mati — isian form di belakang TIDAK dibuang.
+  var dialogSesi = document.getElementById("dialog-sesi");
+  var pesanDialogSesi = document.getElementById("pesan-dialog-sesi");
+
+  function bukaDialogSesi() {
+    if (!dialogSesi) return;
+    dialogSesi.hidden = false;
+    var e = document.getElementById("dialog-email");
+    if (e) e.value = (bacaSesi() || {}).email || "";
+    if (pesanDialogSesi) pesanDialogSesi.textContent = "";
+    if (e) e.focus();
+  }
+
+  function tutupDialogSesi() {
+    if (dialogSesi) dialogSesi.hidden = true;
+  }
+
+  // Masuk lagi dari dialog sesi: simpan token BARU tanpa memuat ulang nilai
+  // (muatNilaiSekarang TIDAK dipanggil — isian pengguna tetap utuh, R4).
+  var tombolMasukLagi = document.getElementById("tombol-masuk-lagi");
+  if (tombolMasukLagi) {
+    tombolMasukLagi.addEventListener("click", function () {
+      var email = document.getElementById("dialog-email").value.trim();
+      var sandi = document.getElementById("dialog-sandi").value;
+      if (pesanDialogSesi) pesanDialogSesi.textContent = "Memeriksa…";
+      minta("/auth/v1/token?grant_type=password", {
+        method: "POST",
+        isi: { email: email, password: sandi }
+      }).then(function (r) {
+        if (r.status === 200 && r.json.access_token) {
+          simpanSesi({ token: r.json.access_token, email: email });
+          tutupDialogSesi();
+          var bannerPulih = document.getElementById("banner-sesi-pulih");
+          if (bannerPulih) {
+            bannerPulih.hidden = false;
+            bannerPulih.textContent = "Sesi dipulihkan — periksa isian sebelum menyimpan.";
+          }
+        } else {
+          if (pesanDialogSesi) pesanDialogSesi.textContent = "Email atau kata sandi salah.";
+        }
+      }).catch(function () {
+        if (pesanDialogSesi) pesanDialogSesi.textContent = "Gagal terhubung — coba lagi.";
+      });
+    });
+  }
+
+  // Escape menutup dialog tanpa aksi (APG Modal Dialog).
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && dialogSesi && !dialogSesi.hidden) tutupDialogSesi();
+  });
+
+  // R3/R4: pesan kegagalan simpan — bedakan sesi mati (dialog) / jaringan /
+  // server; nol kode HTTP di semua pesan pengguna (verbatim UI 4.2).
+  function tanganiGalatSimpan(pesan, objek, e) {
+    if (e === GALAT_SESI) { bukaDialogSesi(); return; }
+    if (e instanceof TypeError) {
+      pesan.textContent = "Tidak bisa menyimpan — periksa koneksi internet, lalu ketuk Simpan lagi.";
+      return;
+    }
+    pesan.textContent = "Gagal menyimpan " + objek + ". Coba sekali lagi; bila tetap gagal, hubungi teknisi.";
+  }
+
   function muatKontenHalaman(token) {
     return minta("/rest/v1/konten_halaman?select=kunci,nilai", { token: token, profil: true }).then(function (r) {
       if (r.status !== 200) return false;
@@ -219,12 +332,14 @@
 
   // --- Form 1: angka dana (+ riwayat, B5)
   var formAngka = document.getElementById("form-angka");
+  var simpanAngkaBerjalan = false; // R5: tolak submit ganda (nol riwayat ganda)
   if (formAngka) {
     formAngka.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var token = tokenSesi();
       if (!token) return;
       if (muatGagal) return; // R2/K9: jangan simpan saat nilai lama gagal dimuat
+      if (simpanAngkaBerjalan) return; // R5
       var pesan = document.getElementById("pesan-angka");
       var periode = document.getElementById("angka-periode").value.trim();
       var terkumpul = bacaAngkaKolom("angka-terkumpul-input");
@@ -238,8 +353,17 @@
         if (kolomSalah) kolomSalah.focus();
         return;
       }
+      // R6 (H14): tersalurkan tidak boleh lebih besar dari terkumpul
+      // (pesan verbatim UI 4.1; tampil di bawah kolom tersalurkan, W9).
+      if (tersalurkan.nilai > terkumpul.nilai) {
+        tampilGalatKolom("galat-tersalurkan", "Dana tersalurkan lebih besar dari yang terkumpul — periksa kembali.");
+        document.getElementById("angka-tersalurkan-input").focus();
+        return;
+      }
+      simpanAngkaBerjalan = true;
+      aturTombolProses("tombol-simpan-angka", true); // R5: "Menyimpan…" + disabled
       var email = (bacaSesi() || {}).email || "admin";
-      // baca nilai lama untuk riwayat
+      // baca nilai lama untuk riwayat (B5) & banner Sebelum -> Sesudah (R13)
       minta("/rest/v1/angka_dana?select=id,terkumpul,tersalurkan&aktif=eq.true&order=diubah_pada.desc&limit=1", { token: token, profil: true }).then(function (r) {
         var lama = (r.status === 200 && r.json.length) ? r.json[0] : null;
         var simpan = lama
@@ -252,7 +376,8 @@
               isi: { periode: periode, terkumpul: terkumpul.nilai, tersalurkan: tersalurkan.nilai, aktif: true }
             });
         return simpan.then(function (sr) {
-          if (sr.status >= 300) throw new Error("HTTP " + sr.status);
+          tolakJikaSesiMati(sr); // R4: 401 = sesi mati -> dialog, isian tetap
+          if (sr.status >= 300) throw new Error("simpan-gagal"); // server; nol kode HTTP (R3)
           // riwayat append-only (B5)
           return minta("/rest/v1/riwayat_angka", {
             method: "POST", token: token, profil: true,
@@ -265,42 +390,65 @@
             }
           });
         }).then(function (rr) {
-          pesan.textContent = rr.status < 300 ? "Angka tersimpan — situs akan menampilkan nilainya dalam ≤ 60 detik." : "Angka tersimpan, tetapi riwayat gagal dicatat (hubungi teknisi).";
+          tolakJikaSesiMati(rr);
+          // R13 (K11): banner sukses bertahan + ringkasan Sebelum -> Sesudah
+          // (angka bertitik ribuan, W15) + tautan "Lihat di situs" (tab baru).
+          var baris = [
+            "✓ Tersimpan.",
+            "Terkumpul: " + formatAngka(lama ? lama.terkumpul : 0) + " → " + formatAngka(terkumpul.nilai),
+            "Tersalurkan: " + formatAngka(lama ? lama.tersalurkan : 0) + " → " + formatAngka(tersalurkan.nilai)
+          ];
+          if (rr.status >= 300) baris.push("Angka tersimpan, tetapi riwayat gagal dicatat (hubungi teknisi).");
+          tampilBannerSukses("banner-sukses-angka", baris, "index.html");
         });
-      }).catch(function () {
-        pesan.textContent = "Gagal menyimpan — periksa koneksi lalu coba lagi.";
+      }).catch(function (e) {
+        tanganiGalatSimpan(pesan, "angka", e); // R3/R4: jaringan/server/sesi mati
+      }).then(function () {
+        simpanAngkaBerjalan = false;
+        aturTombolProses("tombol-simpan-angka", false);
       });
     });
   }
 
   // --- Form 2: kabar penyaluran
   var formKabar = document.getElementById("form-kabar");
+  var simpanKabarBerjalan = false; // R5: tolak submit ganda (nol kabar ganda)
   if (formKabar) {
     formKabar.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var token = tokenSesi();
       if (!token) return;
+      if (simpanKabarBerjalan) return; // R5
       var pesan = document.getElementById("pesan-kabar");
       var urlFoto = document.getElementById("kabar-url-foto").value.trim();
+      var judul = document.getElementById("kabar-judul").value.trim();
+      var terbit = document.getElementById("kabar-terbit").checked;
+      simpanKabarBerjalan = true;
+      aturTombolProses("tombol-simpan-kabar", true); // R5: "Menyimpan…" + disabled
       minta("/rest/v1/kabar_penyaluran", {
         method: "POST", token: token, profil: true,
         isi: {
-          judul: document.getElementById("kabar-judul").value.trim(),
+          judul: judul,
           tanggal: document.getElementById("kabar-tanggal").value,
           ringkasan: document.getElementById("kabar-ringkasan").value.trim(),
           url_foto: urlFoto || null,
-          terbit: document.getElementById("kabar-terbit").checked
+          terbit: terbit
         }
       }).then(function (r) {
-        if (r.status < 300) {
-          pesan.textContent = "Kabar tersimpan.";
-          formKabar.reset();
-          document.getElementById("kabar-terbit").checked = true;
-        } else {
-          pesan.textContent = "Gagal menyimpan kabar (HTTP " + r.status + ").";
-        }
-      }).catch(function () {
-        pesan.textContent = "Gagal terhubung — coba lagi.";
+        tolakJikaSesiMati(r); // R4: 401 = sesi mati -> dialog, isian tetap
+        if (r.status >= 300) throw new Error("simpan-gagal"); // server; nol kode HTTP (R3)
+        // R13 (K11): banner sukses bertahan + status terbit + Lihat di situs
+        tampilBannerSukses("banner-sukses-kabar", [
+          "✓ Tersimpan.",
+          judul + (terbit ? " — tampil di situs." : " — tersimpan, belum tampil di situs.")
+        ], "penyaluran.html");
+        formKabar.reset();
+        document.getElementById("kabar-terbit").checked = true;
+      }).catch(function (e) {
+        tanganiGalatSimpan(pesan, "kabar", e); // R3/R4: jaringan/server/sesi mati
+      }).then(function () {
+        simpanKabarBerjalan = false;
+        aturTombolProses("tombol-simpan-kabar", false);
       });
     });
   }
@@ -318,7 +466,8 @@
         donasi_kanal: document.getElementById("donasi-kanal-input").value.trim(),
         donasi_label: document.getElementById("donasi-label-input").value.trim()
       };
-      simpanKonten(isi, token, pesan, "Konten donasi tersimpan.");
+      simpanKonten(isi, token, pesan, "tombol-simpan-donasi", "banner-sukses-donasi",
+        "donasi", "donasi.html", "Isi halaman Donasi diperbarui.");
     });
   }
 
@@ -337,11 +486,18 @@
         tentang_pengurus: document.getElementById("tentang-pengurus-input").value.trim(),
         kontak_resmi: document.getElementById("kontak-resmi-input").value.trim()
       };
-      simpanKonten(isi, token, pesan, "Konten Tentang tersimpan.");
+      simpanKonten(isi, token, pesan, "tombol-simpan-tentang", "banner-sukses-tentang",
+        "konten Tentang", "tentang.html", "Isi halaman Tentang diperbarui.");
     });
   }
 
-  function simpanKonten(isi, token, pesan, suksesTeks) {
+  var prosesKonten = false; // R5: tolak submit ganda donasi/tentang
+
+  // R3/R4/R5/R13: guard + loading + pesan jaringan/server/sesi + banner sukses.
+  function simpanKonten(isi, token, pesan, idTombol, bannerId, objek, tautanSitus, suksesTeks) {
+    if (prosesKonten) return; // R5
+    prosesKonten = true;
+    aturTombolProses(idTombol, true); // R5: "Menyimpan…" + disabled
     var kunci = Object.keys(isi);
     var rantai = Promise.resolve();
     kunci.forEach(function (k) {
@@ -349,20 +505,29 @@
         return minta("/rest/v1/konten_halaman?kunci=eq." + encodeURIComponent(k), {
           method: "PATCH", token: token, profil: true, isi: { nilai: isi[k] }
         }).then(function (r) {
-          if (r.status >= 300 && r.status !== 404) throw new Error("HTTP " + r.status);
+          tolakJikaSesiMati(r); // R4: 401 = sesi mati -> dialog, isian tetap
+          if (r.status >= 300 && r.status !== 404) throw new Error("simpan-gagal");
           if (r.status === 404) {
             return minta("/rest/v1/konten_halaman", {
               method: "POST", token: token, profil: true,
               isi: { kunci: k, nilai: isi[k] }
             }).then(function (r2) {
-              if (r2.status >= 300) throw new Error("HTTP " + r2.status);
+              tolakJikaSesiMati(r2);
+              if (r2.status >= 300) throw new Error("simpan-gagal");
             });
           }
         });
       });
     });
-    rantai.then(function () { pesan.textContent = suksesTeks; })
-      .catch(function (e) { pesan.textContent = "Gagal menyimpan (" + e.message + ")."; });
+    rantai.then(function () {
+      // R13 (K11): banner sukses bertahan + tautan "Lihat di situs" (tab baru)
+      tampilBannerSukses(bannerId, ["✓ Tersimpan. " + suksesTeks], tautanSitus);
+    }).catch(function (e) {
+      tanganiGalatSimpan(pesan, objek, e); // R3/R4: jaringan/server/sesi mati
+    }).then(function () {
+      prosesKonten = false;
+      aturTombolProses(idTombol, false);
+    });
   }
 
   // --- Restorasi sesi: bila token tersimpan, langsung tampilkan admin
