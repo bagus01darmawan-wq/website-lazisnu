@@ -15,6 +15,8 @@
         <a href="penyaluran.html">Penyaluran</a>
         <a href="donasi.html">Donasi</a>
         <a href="tentang.html">Tentang</a>
+        <!-- R9 (desain K3/W16, H13): tautan Admin di navigasi utama, bukan hanya footer. -->
+        <a href="admin.html" class="tautan-admin aktif" aria-current="page">Admin</a>
       </nav>
       <button type="button" id="tombol-tema" class="tombol-tema" aria-pressed="false">Mode Gelap</button>
     </div>
@@ -42,7 +44,7 @@
       </form>
 
       <div id="wilayah-admin" hidden>
-        <p class="catatan">Masuk sebagai: <strong id="admin-email"></strong> · <a href="#" id="tautan-keluar">Keluar</a></p>
+        <p class="catatan">Masuk sebagai: <strong id="admin-email"></strong> · <a href="index.html" target="_blank" rel="noopener">Lihat situs (tab baru)</a> · <a href="#" id="tautan-keluar">Keluar</a></p>
 
         <!-- R2 (desain K9/W19): peringatan saat nilai lama gagal dimuat; Simpan nonaktif
              sampai "Muat Ulang" berhasil — mencegah isi lama tertimpa tanpa sadar (H5). -->
@@ -51,98 +53,136 @@
           <p><button type="button" id="tombol-muat-ulang" class="tombol-sekunder">Muat Ulang</button></p>
         </div>
 
-        <form id="form-angka" class="kartu">
-          <h2>Perbarui Angka Dana</h2>
-          <p>
-            <label for="angka-periode">Periode (mis. 2026)</label>
-            <input type="text" id="angka-periode" required>
-          </p>
-          <p>
-            <label for="angka-terkumpul-input">Dana terkumpul (Rp)</label>
-            <!-- R1 (desain K4): kolom teks bebas + inputmode decimal agar "2.500.000"
-                 (titik ribuan) diterima; validasi aplikasi membersihkan titik/koma.
-                 Atribut min="1" dipertahankan demi tes QA TE-01 (aturan A); pada
-                 type="text" atribut itu tidak aktif di browser. -->
-            <input type="text" inputmode="decimal" id="angka-terkumpul-input" min="1" aria-describedby="hint-terkumpul galat-terkumpul">
-            <span class="hint" id="hint-terkumpul">Tulis angka biasa, mis. 2.500.000</span>
-            <span class="galat" id="galat-terkumpul" role="alert"></span>
-          </p>
-          <p>
-            <label for="angka-tersalurkan-input">Dana tersalurkan (Rp)</label>
-            <input type="text" inputmode="decimal" id="angka-tersalurkan-input" min="1" aria-describedby="hint-tersalurkan galat-tersalurkan">
-            <span class="hint" id="hint-tersalurkan">Tulis angka biasa, mis. 2.250.000</span>
-            <span class="galat" id="galat-tersalurkan" role="alert"></span>
-          </p>
-          <p id="pesan-angka" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol" id="tombol-simpan-angka">Simpan Angka</button></p>
-          <!-- R13 (desain K11/W12/W15): banner sukses bertahan, elemen flow di
-               BAWAH tombol (tidak menutupi tombol), role="status" (polite). -->
-          <div id="banner-sukses-angka" class="banner-sukses" role="status" hidden></div>
-        </form>
+        <!-- R11 (desain K1/2.3, W10): 4 layar tugas, satu form per layar; tautan (bukan
+             widget Tabs APG) — tiap layar punya URL sendiri (#layar=..., bisa di-refresh)
+             dan isian layar lain TIDAK hilang saat berpindah (JS hanya menyembunyikan/
+             menampilkan). Pola hash dipakai agar pemindai tautan TQ-10 tetap hijau. -->
+        <nav class="layar-nav" aria-label="Tugas admin">
+          <a href="admin.html#layar=angka">Angka Dana</a>
+          <a href="admin.html#layar=kabar">Kabar</a>
+          <a href="admin.html#layar=donasi">Donasi</a>
+          <a href="admin.html#layar=tentang">Tentang</a>
+        </nav>
 
-        <form id="form-kabar" class="kartu">
-          <h2>Tambah Kabar Penyaluran</h2>
-          <p>
-            <label for="kabar-judul">Judul</label>
-            <input type="text" id="kabar-judul" required>
-          </p>
-          <p>
-            <label for="kabar-tanggal">Tanggal</label>
-            <input type="date" id="kabar-tanggal" required>
-          </p>
-          <p>
-            <label for="kabar-ringkasan">Ringkasan</label>
-            <textarea id="kabar-ringkasan" rows="3" required></textarea>
-          </p>
-          <p>
-            <label for="kabar-url-foto">URL foto (opsional)</label>
-            <input type="url" id="kabar-url-foto">
-          </p>
-          <p>
-            <label><input type="checkbox" id="kabar-terbit" checked> Langsung terbit</label>
-          </p>
-          <p id="pesan-kabar" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol" id="tombol-simpan-kabar">Simpan Kabar</button></p>
-          <div id="banner-sukses-kabar" class="banner-sukses" role="status" hidden></div>
-        </form>
+        <!-- Layar 1: Angka Dana (K2 — layar pertama setelah masuk) -->
+        <section class="layar" id="layar-angka" data-layar="angka">
+          <form id="form-angka" class="kartu">
+            <h2>Perbarui Angka Dana</h2>
+            <p>
+              <label for="angka-periode">Periode (mis. 2026)</label>
+              <input type="text" id="angka-periode" required>
+            </p>
+            <p>
+              <label for="angka-terkumpul-input">Dana terkumpul (Rp)</label>
+              <!-- R1 (desain K4): kolom teks bebas + inputmode decimal agar "2.500.000"
+                   (titik ribuan) diterima; validasi aplikasi membersihkan titik/koma.
+                   Atribut min="1" dipertahankan demi tes QA TE-01 (aturan A); pada
+                   type="text" atribut itu tidak aktif di browser. -->
+              <input type="text" inputmode="decimal" id="angka-terkumpul-input" min="1" aria-describedby="hint-terkumpul galat-terkumpul">
+              <span class="hint" id="hint-terkumpul">Tulis angka biasa, mis. 2.500.000</span>
+              <span class="galat" id="galat-terkumpul" role="alert"></span>
+            </p>
+            <p>
+              <label for="angka-tersalurkan-input">Dana tersalurkan (Rp)</label>
+              <input type="text" inputmode="decimal" id="angka-tersalurkan-input" min="1" aria-describedby="hint-tersalurkan galat-tersalurkan">
+              <span class="hint" id="hint-tersalurkan">Tulis angka biasa, mis. 2.250.000</span>
+              <span class="galat" id="galat-tersalurkan" role="alert"></span>
+            </p>
+            <p id="pesan-angka" class="catatan" role="alert"></p>
+            <p><button type="submit" class="tombol" id="tombol-simpan-angka">Simpan Angka</button></p>
+            <!-- R13 (desain K11/W12/W15): banner sukses bertahan, elemen flow di
+                 BAWAH tombol (tidak menutupi tombol), role="status" (polite). -->
+            <div id="banner-sukses-angka" class="banner-sukses" role="status" hidden></div>
+          </form>
+        </section>
 
-        <form id="form-donasi" class="kartu">
-          <h2>Kanal Donasi &amp; Label Transparan</h2>
-          <p>
-            <label for="donasi-kanal-input">Kanal (rekening)</label>
-            <input type="text" id="donasi-kanal-input">
-          </p>
-          <p>
-            <label for="donasi-label-input">Label transparan</label>
-            <textarea id="donasi-label-input" rows="3"></textarea>
-          </p>
-          <p id="pesan-donasi" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol" id="tombol-simpan-donasi">Simpan Donasi</button></p>
-          <div id="banner-sukses-donasi" class="banner-sukses" role="status" hidden></div>
-        </form>
+        <!-- Layar 2: Kabar (K6/K7/K10 — form + daftar) -->
+        <section class="layar" id="layar-kabar" data-layar="kabar" hidden>
+          <form id="form-kabar" class="kartu">
+            <!-- R7: judul berubah jadi "Perbaiki kabar" saat mode Ubah -->
+            <h2 id="judul-form-kabar">Tambah Kabar Penyaluran</h2>
+            <p>
+              <label for="kabar-judul">Judul</label>
+              <input type="text" id="kabar-judul" required>
+            </p>
+            <p>
+              <label for="kabar-tanggal">Tanggal</label>
+              <!-- K7 (R10/matriks §4 no. 1): nilai awal = hari ini (dipasang admin.js),
+                   tetap bisa diubah; normalisasi tampilan id-ID saat ditampilkan. -->
+              <input type="date" id="kabar-tanggal" required>
+              <span class="hint" id="hint-tanggal">Otomatis hari ini — ketuk untuk mengubah</span>
+            </p>
+            <p>
+              <label for="kabar-ringkasan">Ringkasan</label>
+              <textarea id="kabar-ringkasan" rows="3" required></textarea>
+            </p>
+            <p>
+              <label for="kabar-url-foto">URL foto (opsional)</label>
+              <input type="url" id="kabar-url-foto">
+            </p>
+            <!-- R8 (desain K6/2.8): checkbox "langsung terbit" DIGANTI dialog konfirmasi
+                 terbit — salah ketik tidak langsung tampil publik (H7). -->
+            <p id="pesan-kabar" class="catatan" role="alert"></p>
+            <p>
+              <button type="submit" class="tombol" id="tombol-simpan-kabar">Simpan Kabar</button>
+              <button type="button" class="tombol-sekunder" id="tombol-batal-ubah" hidden>Batal</button>
+            </p>
+            <div id="banner-sukses-kabar" class="banner-sukses" role="status" hidden></div>
+          </form>
 
-        <form id="form-tentang" class="kartu">
-          <h2>Konten Halaman Tentang</h2>
-          <p>
-            <label for="tentang-profil-input">Profil singkat</label>
-            <textarea id="tentang-profil-input" rows="3"></textarea>
-          </p>
-          <p>
-            <label for="tentang-legalitas-input">Status legalitas</label>
-            <textarea id="tentang-legalitas-input" rows="2"></textarea>
-          </p>
-          <p>
-            <label for="tentang-pengurus-input">Struktur pengurus</label>
-            <textarea id="tentang-pengurus-input" rows="2"></textarea>
-          </p>
-          <p>
-            <label for="kontak-resmi-input">Kontak resmi</label>
-            <input type="text" id="kontak-resmi-input">
-          </p>
-          <p id="pesan-tentang" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol" id="tombol-simpan-tentang">Simpan Tentang</button></p>
-          <div id="banner-sukses-tentang" class="banner-sukses" role="status" hidden></div>
-        </form>
+          <!-- R7 (desain K10/2.5, 3.7): daftar kabar yang sudah ada — Ubah / Sembunyikan -->
+          <h2>Kabar yang sudah ada</h2>
+          <div id="galat-daftar-kabar" class="banner-peringatan" role="alert" hidden>
+            <p>Isi lama tidak bisa dimuat — periksa koneksi. Menyimpan sekarang akan menimpa isi lama.</p>
+            <p><button type="button" id="tombol-ulang-kabar" class="tombol-sekunder">Muat Ulang</button></p>
+          </div>
+          <p id="memuat-kabar" class="catatan" hidden>Memuat kabar…</p>
+          <ul id="daftar-kabar-admin" class="daftar-kabar-admin"></ul>
+        </section>
+
+        <!-- Layar 3: Donasi -->
+        <section class="layar" id="layar-donasi" data-layar="donasi" hidden>
+          <form id="form-donasi" class="kartu">
+            <h2>Kanal Donasi &amp; Label Transparan</h2>
+            <p>
+              <label for="donasi-kanal-input">Kanal (rekening)</label>
+              <input type="text" id="donasi-kanal-input">
+            </p>
+            <p>
+              <label for="donasi-label-input">Label transparan</label>
+              <textarea id="donasi-label-input" rows="3"></textarea>
+            </p>
+            <p id="pesan-donasi" class="catatan" role="alert"></p>
+            <p><button type="submit" class="tombol" id="tombol-simpan-donasi">Simpan Donasi</button></p>
+            <div id="banner-sukses-donasi" class="banner-sukses" role="status" hidden></div>
+          </form>
+        </section>
+
+        <!-- Layar 4: Tentang -->
+        <section class="layar" id="layar-tentang" data-layar="tentang" hidden>
+          <form id="form-tentang" class="kartu">
+            <h2>Konten Halaman Tentang</h2>
+            <p>
+              <label for="tentang-profil-input">Profil singkat</label>
+              <textarea id="tentang-profil-input" rows="3"></textarea>
+            </p>
+            <p>
+              <label for="tentang-legalitas-input">Status legalitas</label>
+              <textarea id="tentang-legalitas-input" rows="2"></textarea>
+            </p>
+            <p>
+              <label for="tentang-pengurus-input">Struktur pengurus</label>
+              <textarea id="tentang-pengurus-input" rows="2"></textarea>
+            </p>
+            <p>
+              <label for="kontak-resmi-input">Kontak resmi</label>
+              <input type="text" id="kontak-resmi-input">
+            </p>
+            <p id="pesan-tentang" class="catatan" role="alert"></p>
+            <p><button type="submit" class="tombol" id="tombol-simpan-tentang">Simpan Tentang</button></p>
+            <div id="banner-sukses-tentang" class="banner-sukses" role="status" hidden></div>
+          </form>
+        </section>
 
         <!-- R4 (desain K8/2.8, H8): dialog sesi mati — isian di belakang TIDAK
              dibuang; setelah masuk lagi, nilai form tetap utuh (tidak dipanggil
@@ -161,6 +201,33 @@
             </p>
             <p id="pesan-dialog-sesi" class="catatan" role="alert"></p>
             <p><button type="button" id="tombol-masuk-lagi" class="tombol">Masuk lagi</button></p>
+          </div>
+        </div>
+
+        <!-- R8 (desain K6/2.8, W13): dialog konfirmasi terbit — muncul SETELAH ketuk
+             Simpan pada kabar baru/tersembunyi; Escape = tutup tanpa menyimpan apa pun;
+             fokus awal = "Simpan dulu saja" (pilihan aman). -->
+        <div id="dialog-terbit" class="dialog-tutup" role="dialog" aria-modal="true" aria-labelledby="dialog-terbit-judul" hidden>
+          <div class="dialog-kartu">
+            <h2 id="dialog-terbit-judul">Simpan &amp; langsung tampil di situs?</h2>
+            <p id="pratinjau-terbit" class="dialog-teks"></p>
+            <div class="dialog-aksi">
+              <button type="button" id="tombol-terbit-nanti" class="tombol-sekunder">Simpan dulu saja</button>
+              <button type="button" id="tombol-terbit-ya" class="tombol">Ya, tampilkan</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- R7 (desain K10/2.8): dialog konfirmasi sembunyikan — kabar tetap tersimpan
+             (PATCH terbit=false, jalur yang diizinkan kontrak RLS F.2). -->
+        <div id="dialog-sembunyikan" class="dialog-tutup" role="dialog" aria-modal="true" aria-labelledby="dialog-sembunyikan-judul" hidden>
+          <div class="dialog-kartu">
+            <h2 id="dialog-sembunyikan-judul">Sembunyikan kabar dari situs?</h2>
+            <p id="pratinjau-sembunyikan" class="dialog-teks"></p>
+            <div class="dialog-aksi">
+              <button type="button" id="tombol-batal-sembunyikan" class="tombol-sekunder">Batal</button>
+              <button type="button" id="tombol-ya-sembunyikan" class="tombol">Sembunyikan</button>
+            </div>
           </div>
         </div>
 
