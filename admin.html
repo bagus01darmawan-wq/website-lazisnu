@@ -70,7 +70,10 @@
             <h2>Perbarui Angka Dana</h2>
             <p>
               <label for="angka-periode">Periode (mis. 2026)</label>
-              <input type="text" id="angka-periode" required>
+              <!-- R14 (K12/UI 4.1): validasi aplikasi menggantikan gelembung native —
+                   pesan di bawah kolom, Bahasa Indonesia, menyebut kolom + cara perbaiki. -->
+              <input type="text" id="angka-periode" aria-describedby="galat-periode">
+              <span class="galat" id="galat-periode" role="alert"></span>
             </p>
             <p>
               <label for="angka-terkumpul-input">Dana terkumpul (Rp)</label>
@@ -103,22 +106,33 @@
             <h2 id="judul-form-kabar">Tambah Kabar Penyaluran</h2>
             <p>
               <label for="kabar-judul">Judul</label>
-              <input type="text" id="kabar-judul" required>
+              <!-- R14 (K12/UI 4.1): validasi aplikasi — pesan "Isi dulu judul kabar." -->
+              <input type="text" id="kabar-judul" aria-describedby="galat-judul">
+              <span class="galat" id="galat-judul" role="alert"></span>
             </p>
             <p>
               <label for="kabar-tanggal">Tanggal</label>
               <!-- K7 (R10/matriks §4 no. 1): nilai awal = hari ini (dipasang admin.js),
-                   tetap bisa diubah; normalisasi tampilan id-ID saat ditampilkan. -->
-              <input type="date" id="kabar-tanggal" required>
+                   tetap bisa diubah; normalisasi tampilan id-ID saat ditampilkan.
+                   R10: bila browser/WebView tak konsisten, admin.js mengubah kolom ini
+                   menjadi teks dengan pola "11 Agustus 2026" + validasi aplikasi. -->
+              <input type="date" id="kabar-tanggal" aria-describedby="hint-tanggal galat-tanggal">
               <span class="hint" id="hint-tanggal">Otomatis hari ini — ketuk untuk mengubah</span>
+              <span class="galat" id="galat-tanggal" role="alert"></span>
             </p>
             <p>
               <label for="kabar-ringkasan">Ringkasan</label>
-              <textarea id="kabar-ringkasan" rows="3" required></textarea>
+              <textarea id="kabar-ringkasan" rows="3" aria-describedby="galat-ringkasan"></textarea>
+              <span class="galat" id="galat-ringkasan" role="alert"></span>
             </p>
             <p>
               <label for="kabar-url-foto">URL foto (opsional)</label>
-              <input type="url" id="kabar-url-foto">
+              <!-- R12 (desain K5/3.4, H10): type="text" + inputmode="url" (BUKAN
+                   type="url" — gelembung native bahasa sistem); hint verbatim;
+                   validasi aplikasi: bila diisi wajib diawali https:// -->
+              <input type="text" inputmode="url" id="kabar-url-foto" aria-describedby="hint-foto galat-foto">
+              <span class="hint" id="hint-foto">Tempel alamat foto yang diawali https:// (opsional)</span>
+              <span class="galat" id="galat-foto" role="alert"></span>
             </p>
             <!-- R8 (desain K6/2.8): checkbox "langsung terbit" DIGANTI dialog konfirmasi
                  terbit — salah ketik tidak langsung tampil publik (H7). -->
@@ -146,11 +160,14 @@
             <h2>Kanal Donasi &amp; Label Transparan</h2>
             <p>
               <label for="donasi-kanal-input">Kanal (rekening)</label>
-              <input type="text" id="donasi-kanal-input">
+              <!-- R14 (K12/UI 4.1): pesan per kolom di bawah kolom -->
+              <input type="text" id="donasi-kanal-input" aria-describedby="galat-kanal-donasi">
+              <span class="galat" id="galat-kanal-donasi" role="alert"></span>
             </p>
             <p>
               <label for="donasi-label-input">Label transparan</label>
-              <textarea id="donasi-label-input" rows="3"></textarea>
+              <textarea id="donasi-label-input" rows="3" aria-describedby="galat-label-donasi"></textarea>
+              <span class="galat" id="galat-label-donasi" role="alert"></span>
             </p>
             <p id="pesan-donasi" class="catatan" role="alert"></p>
             <p><button type="submit" class="tombol" id="tombol-simpan-donasi">Simpan Donasi</button></p>
@@ -164,19 +181,23 @@
             <h2>Konten Halaman Tentang</h2>
             <p>
               <label for="tentang-profil-input">Profil singkat</label>
-              <textarea id="tentang-profil-input" rows="3"></textarea>
+              <textarea id="tentang-profil-input" rows="3" aria-describedby="galat-tentang-profil"></textarea>
+              <span class="galat" id="galat-tentang-profil" role="alert"></span>
             </p>
             <p>
               <label for="tentang-legalitas-input">Status legalitas</label>
-              <textarea id="tentang-legalitas-input" rows="2"></textarea>
+              <textarea id="tentang-legalitas-input" rows="2" aria-describedby="galat-tentang-legalitas"></textarea>
+              <span class="galat" id="galat-tentang-legalitas" role="alert"></span>
             </p>
             <p>
               <label for="tentang-pengurus-input">Struktur pengurus</label>
-              <textarea id="tentang-pengurus-input" rows="2"></textarea>
+              <textarea id="tentang-pengurus-input" rows="2" aria-describedby="galat-tentang-pengurus"></textarea>
+              <span class="galat" id="galat-tentang-pengurus" role="alert"></span>
             </p>
             <p>
               <label for="kontak-resmi-input">Kontak resmi</label>
-              <input type="text" id="kontak-resmi-input">
+              <input type="text" id="kontak-resmi-input" aria-describedby="galat-kontak-resmi">
+              <span class="galat" id="galat-kontak-resmi" role="alert"></span>
             </p>
             <p id="pesan-tentang" class="catatan" role="alert"></p>
             <p><button type="submit" class="tombol" id="tombol-simpan-tentang">Simpan Tentang</button></p>
