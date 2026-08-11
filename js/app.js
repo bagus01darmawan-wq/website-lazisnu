@@ -17,7 +17,8 @@
     akar.setAttribute("data-tema", gelap ? "gelap" : "terang");
     if (tombol) {
       tombol.setAttribute("aria-pressed", String(gelap));
-      tombol.textContent = gelap ? "Mode Terang" : "Mode Gelap";
+      // W3/W17 (paket desain 2026-08-12): tombol teks "Gelap"/"Terang" — tanpa ikon
+      tombol.textContent = gelap ? "Terang" : "Gelap";
     }
   }
 

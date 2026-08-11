@@ -1,13 +1,23 @@
-/* Gaya bersama — kerangka B0 (T1). Night mode & penyempurnaan tata letak: T2. */
+/* Gaya bersama — kerangka B0 (T1). Night mode & tata letak: T2.
+   Wajah Web paket desain Tim Desain (W1–W20, 2026-08-12): palet hijau tua + emas,
+   tipografi 16px dasar, radius 8px seragam, fokus 2px, mode gelap penuh.
+   ATURAN TERPROTEKSI (tes QA TE-02, jangan ubah): #daftar-kabar p overflow-wrap
+   dan .foto-kabar max-width:100%. */
 
 :root {
-  --warna-latar: #f6f5f1;
+  /* W1/W2/W20 — palet terang (token 3-wajah-web.md §3.1a) */
+  --warna-latar: #ffffff;
   --warna-permukaan: #ffffff;
-  --warna-teks: #1f2933;
-  --warna-teks-redup: #5b6770;
-  --warna-aksen: #0b7a5e;
+  --warna-teks: #1f2a24;
+  --warna-teks-redup: #45564d;
+  --warna-hint: #4a5a51;
+  --warna-aksen: #0b3d2e;          /* primer */
+  --warna-aksen-hover: #0e4a38;
+  --warna-header: #0b3d2e;
   --warna-aksen-teks: #ffffff;
-  --warna-garis: #e2e0d8;
+  --warna-garis: #dce5de;          /* divider dekoratif (W7/catatan §11) */
+  --warna-input-border: #6b7a72;   /* border kolom (non-teks 4,51:1, W20) */
+  --warna-emas: #c9a227;           /* garis aksen header (non-teks) */
   --jarak-lebar: 1rem;
 }
 
@@ -17,10 +27,23 @@
 
 body {
   margin: 0;
-  font-family: system-ui, "Segoe UI", Arial, sans-serif;
-  line-height: 1.6;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif; /* W4: nol unduhan */
+  line-height: 1.5; /* W5 */
   color: var(--warna-teks);
   background: var(--warna-latar);
+}
+
+/* W14: tautan hijau + garis bawah 1px (kecuali tautan nav/panel yang menimpa). */
+a {
+  color: #0b6b4a;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* W8: indikator fokus keyboard — outline 2px + offset 2px; dilarang outline:none. */
+:focus-visible {
+  outline: 2px solid #0b6b4a;
+  outline-offset: 2px;
 }
 
 .lebar {
@@ -29,10 +52,11 @@ body {
   padding: 0 var(--jarak-lebar);
 }
 
-/* Header & footer */
+/* Header & footer — W1: blok hijau tua + garis emas 3px; W5: nav 16px/600 */
 .situs-header {
-  background: var(--warna-aksen);
+  background: var(--warna-header);
   color: var(--warna-aksen-teks);
+  border-bottom: 3px solid var(--warna-emas);
 }
 
 .situs-header .lebar {
@@ -48,8 +72,8 @@ body {
 .merek {
   color: var(--warna-aksen-teks);
   font-weight: 700;
+  font-size: 1rem;
   text-decoration: none;
-  font-size: 1.1rem;
 }
 
 .merek span {
@@ -66,8 +90,9 @@ body {
 .situs-header nav a {
   color: var(--warna-aksen-teks);
   text-decoration: none;
+  font-weight: 600;
   padding: 0.35rem 0.7rem;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
 }
 
 .situs-header nav a:hover,
@@ -97,26 +122,28 @@ body {
   color: var(--warna-teks-redup);
 }
 
-/* Isi */
+/* Isi — W5: skala 16px dasar */
 main {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: 1.375rem; /* 22px/700 */
+  font-weight: 700;
   line-height: 1.3;
 }
 
 h2 {
-  font-size: 1.15rem;
+  font-size: 1.0625rem; /* 17px/700 */
+  font-weight: 700;
 }
 
 /* Komponen kerangka */
 .hero {
   background: var(--warna-permukaan);
   border: 1px solid var(--warna-garis);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem; /* W7: 8px */
   padding: 2rem;
   margin-bottom: 1.5rem;
 }
@@ -126,26 +153,28 @@ h2 {
   color: var(--warna-teks-redup);
 }
 
+/* W11: tombol primer 48px, bobot 700; hover lebih gelap (W1 §3.1a) */
 .tombol {
   display: inline-block;
   background: var(--warna-aksen);
   color: var(--warna-aksen-teks);
   text-decoration: none;
-  font-weight: 600;
-  padding: 0.6rem 1.4rem;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.75rem 1.4rem; /* tinggi ≈48px (W6) */
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
 }
 
 .tombol:hover {
-  opacity: 0.9;
+  background: var(--warna-aksen-hover);
 }
 
 .panel-angka {
   background: var(--warna-permukaan);
   border: 1px solid var(--warna-garis);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1.5rem 2rem;
 }
 
@@ -162,6 +191,7 @@ h2 {
 .angka {
   font-size: 1.75rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums; /* W15 */
   margin: 0;
 }
 
@@ -174,7 +204,7 @@ h2 {
 .kartu {
   background: var(--warna-permukaan);
   border: 1px solid var(--warna-garis);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1.5rem;
   max-width: 26rem;
 }
@@ -186,15 +216,15 @@ h2 {
 
 label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+  font-weight: 600; /* W5: 16px/600 */
+  margin-bottom: 0.375rem; /* W6: label→input 6px */
 }
 
 input {
   width: 100%;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--warna-garis);
-  border-radius: 0.375rem;
+  padding: 0.7rem 0.75rem; /* W6: tinggi ≈48px */
+  border: 1px solid var(--warna-input-border); /* W20: 4,51:1 */
+  border-radius: 0.5rem; /* W7 */
   font: inherit;
   background: var(--warna-permukaan);
   color: var(--warna-teks);
@@ -202,19 +232,15 @@ input {
 
 textarea {
   width: 100%;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--warna-garis);
-  border-radius: 0.375rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--warna-input-border);
+  border-radius: 0.5rem;
   font: inherit;
   background: var(--warna-permukaan);
   color: var(--warna-teks);
 }
 
 @media (max-width: 40rem) {
-  h1 {
-    font-size: 1.4rem;
-  }
-
   .hero {
     padding: 1.25rem;
   }
@@ -225,20 +251,36 @@ textarea {
   }
 }
 
-/* Night mode (T2, AC-07/B8) — tema gelap via variabel; pilihan tersimpan di perangkat */
+/* Night mode (T2, AC-07/B8; W3/W18 — palet gelap 3-wajah-web.md §3.1b) */
 html {
   color-scheme: light;
 }
 
 html[data-tema="gelap"] {
   color-scheme: dark;
-  --warna-latar: #12161a;
-  --warna-permukaan: #1b2127;
-  --warna-teks: #e8eaed;
-  --warna-teks-redup: #9aa4ae;
-  --warna-aksen: #0d9a74;
+  --warna-latar: #0e1a14;
+  --warna-permukaan: #16241d;
+  --warna-teks: #e8f0ea;
+  --warna-teks-redup: #a8b8ae;
+  --warna-hint: #9fb0a6;
+  --warna-aksen: #1e7a52;
+  --warna-aksen-hover: #266b4e;
+  --warna-header: #0a2a1f;
   --warna-aksen-teks: #ffffff;
-  --warna-garis: #2c343c;
+  --warna-garis: #2a3b31;
+  --warna-input-border: #58705f;
+  --warna-emas: #e8c766;
+}
+
+html[data-tema="gelap"] :focus-visible {
+  outline-color: #6fd3a8; /* W8 gelap */
+}
+
+/* W8: fokus di atas header hijau memakai emas (9,38:1) — selektor ganda agar
+   menang spesifisitas atas aturan gelap umum (html[data-tema] :focus-visible). */
+html[data-tema="gelap"] .situs-header :focus-visible,
+.situs-header :focus-visible {
+  outline-color: var(--warna-emas);
 }
 
 .tombol-tema {
@@ -259,7 +301,7 @@ html[data-tema="gelap"] {
 .kabar {
   background: var(--warna-permukaan);
   border: 1px solid var(--warna-garis);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1rem;
 }
@@ -269,29 +311,29 @@ html[data-tema="gelap"] {
 }
 
 .foto-kabar {
-  max-width: 100%;
+  max-width: 100%; /* TERPROTEKSI TE-02 — jangan ubah */
   border-radius: 0.5rem;
   margin: 0.5rem 0;
 }
 
 #daftar-kabar p {
-  overflow-wrap: break-word;
+  overflow-wrap: break-word; /* TERPROTEKSI TE-02 — jangan ubah */
 }
 
 /* --- Paket desain form admin (P0 — R1/R2; token W9/W11/W19) ---
    Hint kolom: teks kecil di bawah input (K4/R1). */
 .hint {
   display: block;
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
-  color: var(--warna-teks-redup);
+  margin-top: 0.25rem; /* W6: input→hint 4px */
+  font-size: 0.875rem; /* W5: 14px */
+  color: var(--warna-hint);
 }
 
 /* Galat kolom: di bawah kolom, bukan hanya warna (W9). */
 .galat {
   display: block;
   margin-top: 0.25rem;
-  font-size: 0.85rem;
+  font-size: 0.875rem; /* W5: 14px/600 */
   font-weight: 600;
   color: #b3261e;
 }
@@ -317,9 +359,9 @@ html[data-tema="gelap"] .tombol:disabled {
   display: inline-block;
   background: var(--warna-permukaan);
   color: var(--warna-aksen);
-  border: 1px solid var(--warna-garis);
+  border: 1px solid var(--warna-input-border);
   border-radius: 0.5rem;
-  padding: 0.6rem 1.4rem;
+  padding: 0.75rem 1.4rem; /* W6: tinggi ≈48px */
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -333,6 +375,7 @@ html[data-tema="gelap"] .tombol:disabled {
   padding: 0.75rem 1rem;
   color: #6b4300;
   margin-bottom: 1rem;
+  font-size: 0.9375rem; /* W5: banner 15px */
 }
 
 html[data-tema="gelap"] .banner-peringatan {
@@ -350,6 +393,7 @@ html[data-tema="gelap"] .banner-peringatan {
   color: #0b3d2e;
   margin-top: 1rem;
   font-variant-numeric: tabular-nums;
+  font-size: 0.9375rem;
 }
 
 .banner-sukses p {
@@ -423,6 +467,7 @@ html[data-tema="gelap"] .dialog-kartu {
   border: 1px solid transparent;
   color: #0b6b4a;
   font-weight: 600;
+  font-size: 0.9375rem; /* W5: chip nav 15px */
   text-decoration: none;
 }
 .layar-nav a:hover {
