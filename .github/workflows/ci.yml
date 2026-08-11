@@ -41,16 +41,27 @@ jobs:
           fi
 
   # Pemindai rahasia — SEC-02: nol kunci/kredensial di kode maupun riwayat commit. Syarat mutlak.
+  # 2026-08-12 (insiden infra): gitleaks/gitleaks-action@v2 (tag mengambang) mulai MEWAJIBKAN
+  # lisensi komersial (GITLEAKS_LICENSE) — CI merah tanpa kebocoran. Solusi: image OSS
+  # zricethezav/gitleaks (MIT) dipakai langsung via docker, di-pin versi; keluar non-nol
+  # bila ada temuan (fail-closed dipertahankan), --redact agar rahasia tak tercetak.
   pemindai-rahasia:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Gitleaks dijalankan sebagai BINARY di host runner (bukan docker action):
+      # (1) gitleaks-action@v2 mewajibkan lisensi komersial sejak 2026-08 (CI merah
+      #     tanpa kebocoran); (2) docker container berjalan sebagai user berbeda →
+      #     git menolak repo (dubious ownership) dan "no leaks found" jadi HASIL
+      #     PALSU (scan kosong). Binary host = user checkout yang sama → riwayat
+      #     penuh terpindai; versi di-pin; --exit-code 1 menjaga fail-closed.
       - name: Gitleaks (SEC-02)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz -o gitleaks.tgz
+          tar -xzf gitleaks.tgz gitleaks
+          ./gitleaks detect --source . --redact --no-banner --exit-code 1
 
   # Build — memastikan kerangka situs utuh.
   build:
