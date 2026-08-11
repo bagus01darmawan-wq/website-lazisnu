@@ -1,10 +1,12 @@
 // tests/run-tes.js — Harness tes QA nol-dependensi (Node standar saja).
-// QA-agent · PRD-001 · Gelombang-1 (terpasang ke kerangka statis).
+// QA-agent · PRD-001 · Gelombang-1 (statis) + Gelombang-2 (database & auth, T6/RLS).
 // Aturan: skrip ini dan seluruh tests/ adalah wilayah QA; builder DILARANG mengubahnya (aturan A).
+// Wiring: npm test -> node tests/run-tes.js. G2 ada di tests/gelombang-2.js (dipanggil dari sini).
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const g2 = require('./gelombang-2.js');
 
 const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript' };
 function serve() {
@@ -22,7 +24,7 @@ function serve() {
   });
 }
 
-const hasil = [];
+const hasil = g2.hasil; // satu larik hasil bersama (G1 + G2)
 const catat = (id, untuk, lulus, catatan) => hasil.push({ id, untuk, lulus, catatan });
 
 (async () => {
@@ -33,6 +35,7 @@ const catat = (id, untuk, lulus, catatan) => hasil.push({ id, untuk, lulus, cata
     return { status: r.status, teks: await r.text() };
   };
 
+  // ================= GELOMBANG-1 (statis, kerangka) =================
   // --- TQ-02 (AC-02): beranda → donasi ≤ 2 klik
   {
     const { teks } = await ambil('/index.html');
@@ -60,7 +63,7 @@ const catat = (id, untuk, lulus, catatan) => hasil.push({ id, untuk, lulus, cata
     const lulus = cekProfil && cekKontak && cekLegalitas;
     catat('TQ-09a', 'Tentang: elemen profil/kontak/legalitas ADA dan BERISI (tag kosong = gagal)', lulus,
       lulus ? 'profil/kontak/legalitas ada dan berisi'
-        : `MERAH: profil≥50char=${cekProfil}, kontak berpola=${cekKontak}, legalitas terisi=${cekLegalitas} — kerangka B0 memang kosong (menunggu T5)`);
+        : `MERAH: profil≥50char=${cekProfil}, kontak berpola=${cekKontak}, legalitas terisi=${cekLegalitas} — konten database belum disuntikkan (npm run generate dulu)`);
   }
 
   // --- TQ-10 (AC-10): 0 tautan rusak + 0 "lorem ipsum"
@@ -86,13 +89,17 @@ const catat = (id, untuk, lulus, catatan) => hasil.push({ id, untuk, lulus, cata
     catat('TE-04', 'meta viewport ada di beranda (syarat rapi HP; uji visual menyusul)', ada, ada ? 'ada' : 'MERAH: meta viewport hilang');
   }
 
+  // ================= GELOMBANG-2 (database & auth — T6/RLS tersedia) =================
+  await g2.main({ ambil });
+
   srv.close();
   // --- Laporan
-  let merah = 0;
+  let merah = 0, skip = 0;
   for (const h of hasil) {
+    if (h.lulus === null) { skip++; console.log(`SKIP   ${h.id.padEnd(7)} ${h.untuk}\n        -> ${h.catatan}`); continue; }
     if (!h.lulus) merah++;
     console.log(`${h.lulus ? 'HIJAU' : 'MERAH'}  ${h.id.padEnd(7)} ${h.untuk}\n        -> ${h.catatan}`);
   }
-  console.log(`\nRingkasan: ${hasil.length - merah} hijau, ${merah} merah (gelombang-1 pada kerangka B0).`);
+  console.log(`\nRingkasan: ${hasil.length - merah - skip} hijau, ${merah} merah, ${skip} skip (G1+G2).`);
   if (merah > 0) process.exit(1);
 })().catch((e) => { console.error('FATAL:', e); process.exit(1); });
