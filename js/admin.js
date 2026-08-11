@@ -29,7 +29,10 @@
     h.apikey = cfg.SUPABASE_ANON_KEY;
     if (opts.token) h.Authorization = "Bearer " + opts.token;
     if (opts.isi !== undefined) h["Content-Type"] = "application/json";
-    if (opts.profil) h["Accept-Profile"] = "lazisnu";
+    if (opts.profil) {
+      h["Accept-Profile"] = "lazisnu";
+      h["Content-Profile"] = "lazisnu"; // WAJIB untuk tulis (POST/PATCH) — tanpanya 404
+    }
     return fetch(URL + path, {
       method: opts.method || "GET",
       headers: h,
