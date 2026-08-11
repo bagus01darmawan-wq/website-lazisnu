@@ -52,3 +52,12 @@ Konfigurasi generator (nilai tidak pernah di-commit):
 
 Alur lokal: `npm run generate && npm test` (generate akan menimpa `tentang.html` di
 working tree dengan versi berisi konten — jangan pernah `git add` berkas hasil generate).
+
+## Deploy (T10)
+
+`./scripts/deploy-vm.sh` — pipeline deploy ke VM (ssh alias `lazisnu`):
+generate konten dari database → kirim berkas statis → salin ke container nginx
+(`lazisnu-nginx-1`, root `/usr/share/nginx/lazisnu`) → pulihkan template lokal.
+Situs publik: **https://png.lazisnu.site** (sertifikat Let's Encrypt via certbot webroot,
+vhost nginx ditambahkan 2026-08-11 — vhost lain tidak diubah).
+Rollback: `git checkout <rev> -- <berkas situs>` lalu jalankan skrip deploy lagi.
