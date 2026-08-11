@@ -31,6 +31,9 @@ function bacaEnv() {
 }
 
 // Peta halaman → kunci konten_halaman yang disuntikkan (skema desain G1).
+// Kunci di `kunci` bersifat WAJIB (gagal-tutup bila kosong); kunci di `opsional`
+// diisi placeholder "[dari database]" bila belum ada di database (tidak menggagalkan
+// generate) — dipakai slot QRIS (putusan HOTL 2026-08-12).
 const HALAMAN = [
   {
     file: "tentang.html",
@@ -46,6 +49,9 @@ const HALAMAN = [
     kunci: {
       donasi_kanal: "{{donasi_kanal}}",
       donasi_label: "{{donasi_label}}",
+    },
+    opsional: {
+      donasi_qris: "{{donasi_qris}}", // gambar/isi QRIS; belum ada → "[dari database]"
     },
   },
 ];
@@ -82,13 +88,19 @@ async function main() {
       if (!nilai) hilang.push(kunci);
       html = html.split(token).join(nilai);
     }
+    // Kunci opsional: placeholder jujur bila data belum ada (bukan lorem ipsum, bukan
+    // halaman kosong; fail-closed hanya berlaku untuk kunci wajib).
+    for (const [kunci, token] of Object.entries(halaman.opsional || {})) {
+      const nilai = (konten.get(kunci) || "").trim();
+      html = html.split(token).join(nilai || "[dari database]");
+    }
     if (hilang.length > 0) {
       console.error(`GAGAL: konten database belum lengkap untuk ${halaman.file} — kunci kosong: ${hilang.join(", ")}`);
       process.exit(1);
     }
     fs.writeFileSync(file, html);
   }
-  console.log("KONTEN OK — tentang.html & donasi.html diperbarui dari database (6 kunci).");
+  console.log("KONTEN OK — tentang.html & donasi.html diperbarui dari database (6 kunci wajib + 1 opsional: donasi_qris).");
 
   // js/config.js — dihasilkan dari env (gitignored). Anon key adalah kunci publik
   // (RLS mengunci tulis), namun tetap tidak pernah masuk commit (SEC-02).

@@ -29,6 +29,13 @@
         <h2>Rekening</h2>
         <p>{{donasi_kanal}}</p>
       </div>
+      <!-- Slot QRIS (putusan HOTL 2026-08-12): tampilkan gambar/isi dari database bila
+           sudah tersedia (kunci opsional donasi_qris di konten_halaman); selama belum ada,
+           tampilkan placeholder "[dari database]" — repo tetap kode murni (aturan B). -->
+      <div id="qris-donasi">
+        <h2>Donasi via QRIS</h2>
+        <p>{{donasi_qris}}</p>
+      </div>
       <div id="label-transparan" aria-live="polite">
         <h2>Keterangan Penting</h2>
         <p>{{donasi_label}}</p>

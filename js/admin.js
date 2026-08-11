@@ -12,6 +12,7 @@
   var URL = cfg.SUPABASE_URL.replace(/\/+$/, "");
   var KUNCI_SESI = "lazisnu-admin-sesi";
   var BATAS_ANGKA = 100000000000000; // 100 triliun — penjaga TE-01 (angka raksasa ditolak)
+  var muatGagal = false; // R2/K9: nilai lama gagal dimuat -> Simpan nonaktif
 
   var formLogin = document.getElementById("form-login");
   var wilayahAdmin = document.getElementById("wilayah-admin");
@@ -120,9 +121,26 @@
   }
 
   // --- Isi form dengan nilai database saat ini (untuk konteks & edit)
-  function muatNilaiSekarang(token) {
-    minta("/rest/v1/konten_halaman?select=kunci,nilai", { token: token, profil: true }).then(function (r) {
-      if (r.status !== 200) return;
+  // R2 (desain K9): bila nilai lama gagal dimuat, tampilkan banner peringatan (pesan
+  // verbatim UI 4.2) dan nonaktifkan Simpan sampai "Muat Ulang" berhasil — mencegah
+  // isi lama tertimpa tanpa sadar (H5). Tombol Simpan juga nonaktif selama memuat.
+  var TOMBOL_SIMPAN = ["tombol-simpan-angka", "tombol-simpan-donasi", "tombol-simpan-tentang"];
+
+  function aturTombolSimpan(nonaktif) {
+    TOMBOL_SIMPAN.forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b) b.disabled = nonaktif;
+    });
+  }
+
+  function aturBannerMuatGagal(tampil) {
+    var banner = document.getElementById("banner-muat-gagal");
+    if (banner) banner.hidden = !tampil;
+  }
+
+  function muatKontenHalaman(token) {
+    return minta("/rest/v1/konten_halaman?select=kunci,nilai", { token: token, profil: true }).then(function (r) {
+      if (r.status !== 200) return false;
       var isi = {};
       r.json.forEach(function (b) { isi[b.kunci] = b.nilai; });
       if (document.getElementById("donasi-kanal-input")) document.getElementById("donasi-kanal-input").value = isi.donasi_kanal || "";
@@ -131,20 +149,72 @@
       if (document.getElementById("tentang-legalitas-input")) document.getElementById("tentang-legalitas-input").value = isi.tentang_legalitas || "";
       if (document.getElementById("tentang-pengurus-input")) document.getElementById("tentang-pengurus-input").value = isi.tentang_pengurus || "";
       if (document.getElementById("kontak-resmi-input")) document.getElementById("kontak-resmi-input").value = isi.kontak_resmi || "";
-    });
-    minta("/rest/v1/angka_dana?select=id,periode,terkumpul,tersalurkan&aktif=eq.true&order=diubah_pada.desc&limit=1", { token: token, profil: true }).then(function (r) {
-      if (r.status !== 200 || !r.json.length) return;
+      return true;
+    }).catch(function () { return false; });
+  }
+
+  function muatAngkaDana(token) {
+    return minta("/rest/v1/angka_dana?select=id,periode,terkumpul,tersalurkan&aktif=eq.true&order=diubah_pada.desc&limit=1", { token: token, profil: true }).then(function (r) {
+      if (r.status !== 200 || !r.json.length) return false;
       var a = r.json[0];
       if (document.getElementById("angka-periode")) document.getElementById("angka-periode").value = a.periode || "";
       if (document.getElementById("angka-terkumpul-input")) document.getElementById("angka-terkumpul-input").value = a.terkumpul != null ? a.terkumpul : "";
       if (document.getElementById("angka-tersalurkan-input")) document.getElementById("angka-tersalurkan-input").value = a.tersalurkan != null ? a.tersalurkan : "";
+      return true;
+    }).catch(function () { return false; });
+  }
+
+  function muatNilaiSekarang(token) {
+    aturTombolSimpan(true);
+    return Promise.all([muatKontenHalaman(token), muatAngkaDana(token)]).then(function (hasil) {
+      var gagal = hasil.some(function (h) { return !h; });
+      muatGagal = gagal;
+      aturBannerMuatGagal(gagal);
+      aturTombolSimpan(gagal);
+      return !gagal;
+    });
+  }
+
+  // --- "Muat Ulang" (R2): coba muat nilai lama lagi; sukses -> banner hilang, Simpan aktif
+  var tombolMuatUlang = document.getElementById("tombol-muat-ulang");
+  if (tombolMuatUlang) {
+    tombolMuatUlang.addEventListener("click", function () {
+      var token = tokenSesi();
+      if (!token) return;
+      muatNilaiSekarang(token);
     });
   }
 
   function validasiAngka(n) {
     if (!(n > 0)) return "Angka harus lebih dari 0.";
-    if (n > BATAS_ANGKA) return "Angka terlalu besar (maksimal 100 triliun) — periksa kembali.";
+    if (n > BATAS_ANGKA) return "Angka terlalu besar. Maksimal 100 triliun — periksa kembali.";
     return null;
+  }
+
+  // --- R1 (desain K4): baca kolom angka bertitik "2.500.000" / koma desimal "2.500.000,50"
+  // Normalisasi saat validasi: buang titik ribuan -> koma -> titik desimal -> Number.
+  function bacaAngkaKolom(id) {
+    var teks = String(document.getElementById(id).value || "").trim();
+    if (!teks) return { kosong: true, nilai: NaN };
+    var dinormalisasi = teks.replace(/\./g, "").replace(",", ".");
+    return { kosong: false, nilai: Number(dinormalisasi) };
+  }
+
+  // Pesan galat per kolom (verbatim UI 4.1; nol/negatif mempertahankan teks lama —
+  // tes QA TE-01 mensyaratkan literal "Angka harus lebih dari 0." di berkas ini, aturan A).
+  function pesanKolomAngka(kolom, baca) {
+    if (baca.kosong) {
+      return kolom === "terkumpul" ? "Isi dulu angka dana terkumpul." : "Isi dulu angka dana tersalurkan.";
+    }
+    if (!isFinite(baca.nilai)) {
+      return "Dana " + kolom + " harus angka. Tulis seperti: 2.500.000.";
+    }
+    return validasiAngka(baca.nilai);
+  }
+
+  function tampilGalatKolom(id, pesan) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = pesan || "";
   }
 
   // --- Form 1: angka dana (+ riwayat, B5)
@@ -154,12 +224,20 @@
       ev.preventDefault();
       var token = tokenSesi();
       if (!token) return;
+      if (muatGagal) return; // R2/K9: jangan simpan saat nilai lama gagal dimuat
       var pesan = document.getElementById("pesan-angka");
       var periode = document.getElementById("angka-periode").value.trim();
-      var terkumpul = Number(document.getElementById("angka-terkumpul-input").value);
-      var tersalurkan = Number(document.getElementById("angka-tersalurkan-input").value);
-      var err = validasiAngka(terkumpul) || validasiAngka(tersalurkan);
-      if (err) { pesan.textContent = err; return; }
+      var terkumpul = bacaAngkaKolom("angka-terkumpul-input");
+      var tersalurkan = bacaAngkaKolom("angka-tersalurkan-input");
+      var e1 = pesanKolomAngka("terkumpul", terkumpul);
+      var e2 = pesanKolomAngka("tersalurkan", tersalurkan);
+      tampilGalatKolom("galat-terkumpul", e1);
+      tampilGalatKolom("galat-tersalurkan", e2);
+      if (e1 || e2) {
+        var kolomSalah = document.getElementById(e1 ? "angka-terkumpul-input" : "angka-tersalurkan-input");
+        if (kolomSalah) kolomSalah.focus();
+        return;
+      }
       var email = (bacaSesi() || {}).email || "admin";
       // baca nilai lama untuk riwayat
       minta("/rest/v1/angka_dana?select=id,terkumpul,tersalurkan&aktif=eq.true&order=diubah_pada.desc&limit=1", { token: token, profil: true }).then(function (r) {
@@ -167,11 +245,11 @@
         var simpan = lama
           ? minta("/rest/v1/angka_dana?id=eq." + lama.id, {
               method: "PATCH", token: token, profil: true,
-              isi: { periode: periode, terkumpul: terkumpul, tersalurkan: tersalurkan }
+              isi: { periode: periode, terkumpul: terkumpul.nilai, tersalurkan: tersalurkan.nilai }
             })
           : minta("/rest/v1/angka_dana", {
               method: "POST", token: token, profil: true,
-              isi: { periode: periode, terkumpul: terkumpul, tersalurkan: tersalurkan, aktif: true }
+              isi: { periode: periode, terkumpul: terkumpul.nilai, tersalurkan: tersalurkan.nilai, aktif: true }
             });
         return simpan.then(function (sr) {
           if (sr.status >= 300) throw new Error("HTTP " + sr.status);
@@ -180,9 +258,9 @@
             method: "POST", token: token, profil: true,
             isi: {
               terkumpul_lama: lama ? lama.terkumpul : 0,
-              terkumpul_baru: terkumpul,
+              terkumpul_baru: terkumpul.nilai,
               tersalurkan_lama: lama ? lama.tersalurkan : 0,
-              tersalurkan_baru: tersalurkan,
+              tersalurkan_baru: tersalurkan.nilai,
               diubah_oleh: email
             }
           });
@@ -234,6 +312,7 @@
       ev.preventDefault();
       var token = tokenSesi();
       if (!token) return;
+      if (muatGagal) return; // R2/K9: jangan simpan saat nilai lama gagal dimuat
       var pesan = document.getElementById("pesan-donasi");
       var isi = {
         donasi_kanal: document.getElementById("donasi-kanal-input").value.trim(),
@@ -250,6 +329,7 @@
       ev.preventDefault();
       var token = tokenSesi();
       if (!token) return;
+      if (muatGagal) return; // R2/K9: jangan simpan saat nilai lama gagal dimuat
       var pesan = document.getElementById("pesan-tentang");
       var isi = {
         tentang_profil: document.getElementById("tentang-profil-input").value.trim(),

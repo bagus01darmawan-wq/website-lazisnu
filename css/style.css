@@ -277,3 +277,65 @@ html[data-tema="gelap"] {
 #daftar-kabar p {
   overflow-wrap: break-word;
 }
+
+/* --- Paket desain form admin (P0 — R1/R2; token W9/W11/W19) ---
+   Hint kolom: teks kecil di bawah input (K4/R1). */
+.hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--warna-teks-redup);
+}
+
+/* Galat kolom: di bawah kolom, bukan hanya warna (W9). */
+.galat {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #b3261e;
+}
+
+html[data-tema="gelap"] .galat {
+  color: #ffb4ab;
+}
+
+/* Tombol nonaktif terencana (K9/R2): label tetap terbaca (W11). */
+.tombol:disabled {
+  background: #e3e8e3;
+  color: #3a4a42;
+  cursor: not-allowed;
+}
+
+html[data-tema="gelap"] .tombol:disabled {
+  background: #22322a;
+  color: #8a9b91;
+}
+
+/* Tombol sekunder (mis. "Muat Ulang" di banner peringatan). */
+.tombol-sekunder {
+  display: inline-block;
+  background: var(--warna-permukaan);
+  color: var(--warna-aksen);
+  border: 1px solid var(--warna-garis);
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Banner peringatan muat-gagal (K9/R2, W19): peringatan, bukan galat. */
+.banner-peringatan {
+  background: #fff4e0;
+  border-left: 4px solid #c9a227;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #6b4300;
+  margin-bottom: 1rem;
+}
+
+html[data-tema="gelap"] .banner-peringatan {
+  background: #2e2413;
+  color: #e8c766;
+}
