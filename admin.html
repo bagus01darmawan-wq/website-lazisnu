@@ -44,6 +44,13 @@
       <div id="wilayah-admin" hidden>
         <p class="catatan">Masuk sebagai: <strong id="admin-email"></strong> · <a href="#" id="tautan-keluar">Keluar</a></p>
 
+        <!-- R2 (desain K9/W19): peringatan saat nilai lama gagal dimuat; Simpan nonaktif
+             sampai "Muat Ulang" berhasil — mencegah isi lama tertimpa tanpa sadar (H5). -->
+        <div id="banner-muat-gagal" class="banner-peringatan" role="alert" hidden>
+          <p>Isi lama tidak bisa dimuat — periksa koneksi. Menyimpan sekarang akan menimpa isi lama.</p>
+          <p><button type="button" id="tombol-muat-ulang" class="tombol-sekunder">Muat Ulang</button></p>
+        </div>
+
         <form id="form-angka" class="kartu">
           <h2>Perbarui Angka Dana</h2>
           <p>
@@ -52,14 +59,22 @@
           </p>
           <p>
             <label for="angka-terkumpul-input">Dana terkumpul (Rp)</label>
-            <input type="number" id="angka-terkumpul-input" min="1" step="1" required>
+            <!-- R1 (desain K4): kolom teks bebas + inputmode decimal agar "2.500.000"
+                 (titik ribuan) diterima; validasi aplikasi membersihkan titik/koma.
+                 Atribut min="1" dipertahankan demi tes QA TE-01 (aturan A); pada
+                 type="text" atribut itu tidak aktif di browser. -->
+            <input type="text" inputmode="decimal" id="angka-terkumpul-input" min="1" aria-describedby="hint-terkumpul galat-terkumpul">
+            <span class="hint" id="hint-terkumpul">Tulis angka biasa, mis. 2.500.000</span>
+            <span class="galat" id="galat-terkumpul" role="alert"></span>
           </p>
           <p>
             <label for="angka-tersalurkan-input">Dana tersalurkan (Rp)</label>
-            <input type="number" id="angka-tersalurkan-input" min="1" step="1" required>
+            <input type="text" inputmode="decimal" id="angka-tersalurkan-input" min="1" aria-describedby="hint-tersalurkan galat-tersalurkan">
+            <span class="hint" id="hint-tersalurkan">Tulis angka biasa, mis. 2.250.000</span>
+            <span class="galat" id="galat-tersalurkan" role="alert"></span>
           </p>
           <p id="pesan-angka" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol">Simpan Angka</button></p>
+          <p><button type="submit" class="tombol" id="tombol-simpan-angka">Simpan Angka</button></p>
         </form>
 
         <form id="form-kabar" class="kartu">
@@ -98,7 +113,7 @@
             <textarea id="donasi-label-input" rows="3"></textarea>
           </p>
           <p id="pesan-donasi" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol">Simpan Donasi</button></p>
+          <p><button type="submit" class="tombol" id="tombol-simpan-donasi">Simpan Donasi</button></p>
         </form>
 
         <form id="form-tentang" class="kartu">
@@ -120,7 +135,7 @@
             <input type="text" id="kontak-resmi-input">
           </p>
           <p id="pesan-tentang" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol">Simpan Tentang</button></p>
+          <p><button type="submit" class="tombol" id="tombol-simpan-tentang">Simpan Tentang</button></p>
         </form>
       </div>
     </section>
