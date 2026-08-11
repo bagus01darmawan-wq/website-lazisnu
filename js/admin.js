@@ -401,6 +401,80 @@
     } catch (e) { return t; }
   }
 
+  // R10 (K7/3.3, E3/matriks T1–T3): fallback manual otomatis bila browser/WebView
+  // tidak konsisten dengan input[type=date] — kolom teks pola "11 Agustus 2026" +
+  // validasi aplikasi ("Tanggal tidak valid. Gunakan format 11 Agustus 2026.").
+  // Pintu uji: window.LAZISNU_PAKSA_TANGGAL_TEKS — dipakai demo/G3 untuk menguji
+  // jalur fallback di browser modern yang sebenarnya mendukung type=date.
+  var PAKSA_FALLBACK_TANGGAL = typeof window !== "undefined" && window.LAZISNU_PAKSA_TANGGAL_TEKS === true;
+
+  function dukungTanggalNative() {
+    try {
+      var el = document.createElement("input");
+      el.type = "date";
+      el.value = "2026-08-12";
+      return el.value === "2026-08-12";
+    } catch (e) { return false; }
+  }
+
+  var fallbackTanggal = PAKSA_FALLBACK_TANGGAL || !dukungTanggalNative();
+  var BULAN_ID = {
+    januari: 1, februari: 2, maret: 3, april: 4, mei: 5, juni: 6,
+    juli: 7, agustus: 8, september: 9, oktober: 10, november: 11, desember: 12
+  };
+
+  // "11 Agustus 2026" -> "2026-08-11"; null bila tidak valid.
+  function parseTanggalId(teks) {
+    var m = /^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/.exec(String(teks || "").trim());
+    if (!m) return null;
+    var bulan = BULAN_ID[m[2].toLowerCase()];
+    if (!bulan) return null;
+    var tgl = parseInt(m[1], 10);
+    var tahun = parseInt(m[3], 10);
+    if (tgl < 1 || tgl > 31 || tahun < 1900 || tahun > 2200) return null;
+    return tahun + "-" + ("0" + bulan).slice(-2) + "-" + ("0" + tgl).slice(-2);
+  }
+
+  // Nilai tanggal kabar dalam format ISO (YYYY-MM-DD); null bila kosong/tidak valid.
+  function nilaiTanggalKabar() {
+    var el = document.getElementById("kabar-tanggal");
+    if (!el) return null;
+    if (!fallbackTanggal) return el.value || null;
+    var teks = el.value.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(teks)) return teks; // terima ISO juga
+    return parseTanggalId(teks);
+  }
+
+  // Tampilkan tanggal ISO sesuai mode kolom (native: value; fallback: teks id-ID).
+  function tampilTanggalKabar(iso) {
+    var el = document.getElementById("kabar-tanggal");
+    if (!el || !iso) return;
+    if (fallbackTanggal) el.value = formatTanggalKabar(iso);
+    else el.value = iso;
+  }
+
+  // R10: pasang mode fallback bila diperlukan (type=date -> teks pola id-ID).
+  function pasangModeTanggal() {
+    var el = document.getElementById("kabar-tanggal");
+    if (!el || !fallbackTanggal) return;
+    el.type = "text";
+    el.setAttribute("inputmode", "text");
+    el.setAttribute("placeholder", "11 Agustus 2026");
+  }
+
+  // R14 (K12/4.1): validasi aplikasi per kolom — galat di bawah kolom, fokus ke
+  // kolom pertama yang salah; pesan verbatim UI 4.1 (≤20 kata, nol kode HTTP).
+  function validasiKolom(aturan) {
+    var kolomSalah = null;
+    aturan.forEach(function (a) {
+      var el = document.getElementById(a.id);
+      var kosong = !el || !String(el.value || "").trim();
+      tampilGalatKolom(a.galat, kosong ? a.pesanKosong : "");
+      if (kosong && !kolomSalah) kolomSalah = a.id;
+    });
+    return kolomSalah;
+  }
+
   function muatDaftarKabar() {
     var token = tokenSesi();
     if (!token || !daftarKabarEl) return;
@@ -475,7 +549,7 @@
     kabarEditId = k.id;
     kabarEditTerbit = !!k.terbit;
     document.getElementById("kabar-judul").value = k.judul;
-    document.getElementById("kabar-tanggal").value = k.tanggal || "";
+    tampilTanggalKabar(k.tanggal || ""); // R10: sesuaikan mode kolom (native/fallback)
     document.getElementById("kabar-ringkasan").value = k.ringkasan || "";
     document.getElementById("kabar-url-foto").value = k.url_foto || "";
     document.getElementById("judul-form-kabar").textContent = "Perbaiki kabar";
@@ -492,8 +566,7 @@
     kabarEditTerbit = false;
     var form = document.getElementById("form-kabar");
     if (form) form.reset();
-    var tanggal = document.getElementById("kabar-tanggal");
-    if (tanggal) tanggal.value = hariIni(); // K7
+    tampilTanggalKabar(hariIni()); // K7 + R10: hari ini, sesuai mode kolom
     document.getElementById("judul-form-kabar").textContent = "Tambah Kabar Penyaluran";
     document.getElementById("tombol-simpan-kabar").textContent = "Simpan Kabar";
     document.getElementById("tombol-batal-ubah").hidden = true;
@@ -659,10 +732,13 @@
       var tersalurkan = bacaAngkaKolom("angka-tersalurkan-input");
       var e1 = pesanKolomAngka("terkumpul", terkumpul);
       var e2 = pesanKolomAngka("tersalurkan", tersalurkan);
+      // R14 (K12/4.1): periode kosong ditolak dengan pesan per kolom
+      var ePeriode = periode ? "" : "Isi dulu periode, mis. 2026.";
+      tampilGalatKolom("galat-periode", ePeriode);
       tampilGalatKolom("galat-terkumpul", e1);
       tampilGalatKolom("galat-tersalurkan", e2);
-      if (e1 || e2) {
-        var kolomSalah = document.getElementById(e1 ? "angka-terkumpul-input" : "angka-tersalurkan-input");
+      if (ePeriode || e1 || e2) {
+        var kolomSalah = document.getElementById(ePeriode ? "angka-periode" : (e1 ? "angka-terkumpul-input" : "angka-tersalurkan-input"));
         if (kolomSalah) kolomSalah.focus();
         return;
       }
@@ -733,10 +809,43 @@
       if (!token) return;
       if (simpanKabarBerjalan) return; // R5
       var judul = document.getElementById("kabar-judul").value.trim();
-      var tanggal = document.getElementById("kabar-tanggal").value;
+      var tanggal = nilaiTanggalKabar(); // R10: native ISO atau parse id-ID
+      var tanggalKosong = !String(document.getElementById("kabar-tanggal").value || "").trim();
       var ringkasan = document.getElementById("kabar-ringkasan").value.trim();
       var urlFoto = document.getElementById("kabar-url-foto").value.trim();
       var tombol = document.getElementById("tombol-simpan-kabar");
+      // R14 (K12/4.1): validasi aplikasi per kolom — fokus ke kolom pertama salah.
+      tampilGalatKolom("galat-judul", "");
+      tampilGalatKolom("galat-tanggal", "");
+      tampilGalatKolom("galat-ringkasan", "");
+      tampilGalatKolom("galat-foto", "");
+      var galatPertama = null;
+      if (!judul) {
+        tampilGalatKolom("galat-judul", "Isi dulu judul kabar.");
+        galatPertama = "kabar-judul";
+      }
+      if (tanggalKosong) {
+        tampilGalatKolom("galat-tanggal", "Isi dulu tanggal kabar.");
+        if (!galatPertama) galatPertama = "kabar-tanggal";
+      } else if (!tanggal) {
+        // R10 (matriks §4 no. 4, verbatim): fallback manual tak bisa dipahami
+        tampilGalatKolom("galat-tanggal", "Tanggal tidak valid. Gunakan format 11 Agustus 2026.");
+        if (!galatPertama) galatPertama = "kabar-tanggal";
+      }
+      if (!ringkasan) {
+        tampilGalatKolom("galat-ringkasan", "Isi dulu ringkasan kabar.");
+        if (!galatPertama) galatPertama = "kabar-ringkasan";
+      }
+      if (urlFoto && urlFoto.indexOf("https://") !== 0) {
+        // R12 (K5/3.4, H10, verbatim): wajib https://
+        tampilGalatKolom("galat-foto", "Alamat foto harus diawali https://. Salin alamat dari browser, lalu tempel.");
+        if (!galatPertama) galatPertama = "kabar-url-foto";
+      }
+      if (galatPertama) {
+        var kolomSalah = document.getElementById(galatPertama);
+        if (kolomSalah) kolomSalah.focus();
+        return;
+      }
       // R8 (K6): kabar baru/tersembunyi -> ditanya dulu; kabar terbit -> simpan langsung.
       var perluKonfirmasi = !kabarEditId || !kabarEditTerbit;
       if (perluKonfirmasi) {
@@ -789,6 +898,15 @@
       if (!token) return;
       if (muatGagal) return; // R2/K9: jangan simpan saat nilai lama gagal dimuat
       var pesan = document.getElementById("pesan-donasi");
+      // R14 (K12/4.1): kolom kosong ditolak dengan pesan per kolom
+      var galatPertama = validasiKolom([
+        { id: "donasi-kanal-input", galat: "galat-kanal-donasi", pesanKosong: "Isi dulu isi kanal donasi." },
+        { id: "donasi-label-input", galat: "galat-label-donasi", pesanKosong: "Isi dulu label transparan." }
+      ]);
+      if (galatPertama) {
+        document.getElementById(galatPertama).focus();
+        return;
+      }
       var isi = {
         donasi_kanal: document.getElementById("donasi-kanal-input").value.trim(),
         donasi_label: document.getElementById("donasi-label-input").value.trim()
@@ -807,6 +925,17 @@
       if (!token) return;
       if (muatGagal) return; // R2/K9: jangan simpan saat nilai lama gagal dimuat
       var pesan = document.getElementById("pesan-tentang");
+      // R14 (K12/4.1): kolom kosong ditolak dengan pesan per kolom
+      var galatPertama = validasiKolom([
+        { id: "tentang-profil-input", galat: "galat-tentang-profil", pesanKosong: "Isi dulu profil lembaga." },
+        { id: "tentang-legalitas-input", galat: "galat-tentang-legalitas", pesanKosong: "Isi dulu status legalitas." },
+        { id: "tentang-pengurus-input", galat: "galat-tentang-pengurus", pesanKosong: "Isi dulu struktur pengurus." },
+        { id: "kontak-resmi-input", galat: "galat-kontak-resmi", pesanKosong: "Isi dulu kontak resmi." }
+      ]);
+      if (galatPertama) {
+        document.getElementById(galatPertama).focus();
+        return;
+      }
       var isi = {
         tentang_profil: document.getElementById("tentang-profil-input").value.trim(),
         tentang_legalitas: document.getElementById("tentang-legalitas-input").value.trim(),
@@ -857,9 +986,10 @@
     });
   }
 
-  // --- K7: tanggal kabar bernilai awal hari ini (bisa diubah)
+  // --- K7/R10: tanggal kabar bernilai awal hari ini (native atau fallback teks)
+  pasangModeTanggal();
   var tanggalKabar = document.getElementById("kabar-tanggal");
-  if (tanggalKabar && !tanggalKabar.value) tanggalKabar.value = hariIni();
+  if (tanggalKabar && !tanggalKabar.value) tampilTanggalKabar(hariIni());
 
   // --- Restorasi sesi: bila token tersimpan, langsung tampilkan admin
   var sesi = bacaSesi();
