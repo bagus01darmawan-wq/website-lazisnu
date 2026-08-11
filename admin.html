@@ -75,6 +75,9 @@
           </p>
           <p id="pesan-angka" class="catatan" role="alert"></p>
           <p><button type="submit" class="tombol" id="tombol-simpan-angka">Simpan Angka</button></p>
+          <!-- R13 (desain K11/W12/W15): banner sukses bertahan, elemen flow di
+               BAWAH tombol (tidak menutupi tombol), role="status" (polite). -->
+          <div id="banner-sukses-angka" class="banner-sukses" role="status" hidden></div>
         </form>
 
         <form id="form-kabar" class="kartu">
@@ -99,7 +102,8 @@
             <label><input type="checkbox" id="kabar-terbit" checked> Langsung terbit</label>
           </p>
           <p id="pesan-kabar" class="catatan" role="alert"></p>
-          <p><button type="submit" class="tombol">Simpan Kabar</button></p>
+          <p><button type="submit" class="tombol" id="tombol-simpan-kabar">Simpan Kabar</button></p>
+          <div id="banner-sukses-kabar" class="banner-sukses" role="status" hidden></div>
         </form>
 
         <form id="form-donasi" class="kartu">
@@ -114,6 +118,7 @@
           </p>
           <p id="pesan-donasi" class="catatan" role="alert"></p>
           <p><button type="submit" class="tombol" id="tombol-simpan-donasi">Simpan Donasi</button></p>
+          <div id="banner-sukses-donasi" class="banner-sukses" role="status" hidden></div>
         </form>
 
         <form id="form-tentang" class="kartu">
@@ -136,7 +141,30 @@
           </p>
           <p id="pesan-tentang" class="catatan" role="alert"></p>
           <p><button type="submit" class="tombol" id="tombol-simpan-tentang">Simpan Tentang</button></p>
+          <div id="banner-sukses-tentang" class="banner-sukses" role="status" hidden></div>
         </form>
+
+        <!-- R4 (desain K8/2.8, H8): dialog sesi mati — isian di belakang TIDAK
+             dibuang; setelah masuk lagi, nilai form tetap utuh (tidak dipanggil
+             muatNilaiSekarang). -->
+        <div id="dialog-sesi" class="dialog-tutup" role="dialog" aria-modal="true" aria-labelledby="dialog-sesi-judul" hidden>
+          <div class="dialog-kartu">
+            <h2 id="dialog-sesi-judul">Sesi berakhir — isi ulang email &amp; kata sandi.</h2>
+            <p>Isian Anda masih tersimpan di belakang.</p>
+            <p>
+              <label for="dialog-email">Email admin</label>
+              <input type="email" id="dialog-email" autocomplete="username">
+            </p>
+            <p>
+              <label for="dialog-sandi">Kata sandi</label>
+              <input type="password" id="dialog-sandi" autocomplete="current-password">
+            </p>
+            <p id="pesan-dialog-sesi" class="catatan" role="alert"></p>
+            <p><button type="button" id="tombol-masuk-lagi" class="tombol">Masuk lagi</button></p>
+          </div>
+        </div>
+
+        <p id="banner-sesi-pulih" class="banner-sukses" role="status" hidden></p>
       </div>
     </section>
   </main>
