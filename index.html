@@ -23,6 +23,24 @@
   </header>
 
   <main class="lebar">
+    <!-- TQ-O3/B10 (perbaikan T12 2026-08-12): pemulihan sandi admin — tampil HANYA
+         saat email reset dibuka (hash #type=recovery di URL); tanpa itu tetap
+         tersembunyi dan halaman beranda tidak berubah. -->
+    <section id="pulihkan-sandi" class="kartu" hidden aria-labelledby="judul-pulihkan">
+      <h2 id="judul-pulihkan">Buat Sandi Baru</h2>
+      <p class="catatan">Tautan pemulihan dikenali. Pilih sandi baru untuk akun admin Anda.</p>
+      <p>
+        <label for="sandi-baru">Sandi baru</label>
+        <input type="password" id="sandi-baru" autocomplete="new-password">
+      </p>
+      <p>
+        <label for="sandi-baru-ulang">Ulangi sandi baru</label>
+        <input type="password" id="sandi-baru-ulang" autocomplete="new-password">
+      </p>
+      <p id="pesan-pulihkan" class="catatan" role="alert"></p>
+      <p><button type="button" id="tombol-simpan-sandi" class="tombol">Simpan Sandi Baru</button></p>
+    </section>
+
     <!-- T3: identitas lembaga; tagline tetap (kode murni, bukan data lembaga). -->
     <section class="hero" aria-labelledby="judul-identitas">
       <h1 id="judul-identitas">LAZISNU MWC NU Kecamatan Paninggaran</h1>
@@ -55,6 +73,7 @@
   </footer>
 
   <script src="js/config.js"></script>
+  <script src="js/pulihkan-sandi.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 </body>

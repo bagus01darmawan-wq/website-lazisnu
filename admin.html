@@ -131,7 +131,9 @@
                    type="url" — gelembung native bahasa sistem); hint verbatim;
                    validasi aplikasi: bila diisi wajib diawali https:// -->
               <input type="text" inputmode="url" id="kabar-url-foto" aria-describedby="hint-foto galat-foto">
-              <span class="hint" id="hint-foto">Tempel alamat foto yang diawali https:// (opsional)</span>
+              <!-- Perbaikan T12 (2026-08-12): hint diperjelas — temuan nyata: admin
+                   menempel alamat halaman web, bukan alamat gambar langsung. -->
+              <span class="hint" id="hint-foto">Tempel alamat gambar langsung yang diawali https:// dan diakhiri .jpg/.png/.webp (opsional)</span>
               <span class="galat" id="galat-foto" role="alert"></span>
             </p>
             <!-- R8 (desain K6/2.8): checkbox "langsung terbit" DIGANTI dialog konfirmasi
