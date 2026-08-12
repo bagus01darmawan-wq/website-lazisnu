@@ -93,6 +93,9 @@
       var email = document.getElementById("login-email").value.trim();
       if (!email) {
         if (pesanLogin) pesanLogin.textContent = "Isi alamat email admin dulu, lalu klik tautan ini.";
+        // Perbaikan T12 (2026-08-12): feedback lebih terlihat — fokus ke kolom email
+        var e = document.getElementById("login-email");
+        if (e) e.focus();
         return;
       }
       minta("/auth/v1/recover", { method: "POST", isi: { email: email } }).then(function (r) {

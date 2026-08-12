@@ -99,6 +99,15 @@
           img.src = k.url_foto;
           img.alt = "";
           img.className = "foto-kabar";
+          // Perbaikan T12 (2026-08-12): alamat bukan gambar langsung (temuan nyata)
+          // → jangan tampilkan ikon pecah; sembunyikan + catatan kecil.
+          img.onerror = function () {
+            img.style.display = "none";
+            var catatan = document.createElement("p");
+            catatan.className = "catatan";
+            catatan.textContent = "Foto tidak tampil.";
+            artikel.insertBefore(catatan, ringkas);
+          };
           artikel.appendChild(img);
         }
 
