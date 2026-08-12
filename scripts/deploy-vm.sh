@@ -27,7 +27,9 @@ PAKET="$(mktemp -d)"
 mkdir -p "$PAKET/css" "$PAKET/js"
 cp index.html penyaluran.html donasi.html tentang.html admin.html "$PAKET/"
 cp css/style.css "$PAKET/css/"
-cp js/config.js js/data.js js/admin.js js/app.js "$PAKET/js/"
+# Daftar JS EKSPLISIT — berkas baru WAJIB ditambahkan di sini (pelajaran 2026-08-12:
+# pulihkan-sandi.js sempat tidak ter-deploy karena tidak ada di daftar → 404 live).
+cp js/config.js js/data.js js/admin.js js/app.js js/pulihkan-sandi.js "$PAKET/js/"
 tar czf /tmp/lazisnu-site.tar.gz -C "$PAKET" .
 
 echo "==> 3/6 Kirim ke VM (ssh lazisnu)"
